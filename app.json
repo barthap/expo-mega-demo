@@ -14,9 +14,11 @@
       "fallbackToCacheTimeout": 0
     },
     "ios": {
+      "bundleIdentifier": "com.barthap.expomegademo",
       "supportsTablet": false
     },
     "android": {
+      "package": "com.barthap.expomegademo",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#FFFFFF"
