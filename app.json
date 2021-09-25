@@ -5,6 +5,7 @@
     "version": "0.1.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
+    "scheme": "demo",
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
@@ -27,7 +28,8 @@
     "assetBundlePatterns": ["**/*"],
     "plugins": [
       "@config-plugins/react-native-ble-plx",
-      "./fix-entitlements.plugin",
+      "./patches/fix-entitlements.plugin",
+      "expo-dev-client",
       "./custom_native_modules/expo-music-picker/app.plugin",
       "./custom_native_modules/link-custom-modules.plugin"
     ]
