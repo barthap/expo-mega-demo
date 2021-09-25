@@ -30,11 +30,14 @@ export class Complex {
     dst.im = er * Math.sin(this.im);
     return dst;
   }
+  /**
+   * @returns Magnitude of the complex number
+   */
   mag() {
     return Math.sqrt(this.re * this.re + this.im * this.im);
   }
 
-  log() {
+  print() {
     /*
 	although 'It's just a matter of separating out the real and imaginary parts of jw.' is not a helpful quote
 	the actual formula I found here and the rest was just fiddling / testing and comparing with correct results.
