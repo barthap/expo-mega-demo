@@ -1,0 +1,11 @@
+{
+  "expo": {
+    "name": "expo-mega-demo",
+    "slug": "expo-mega-demo",
+    "version": "1.0.0",
+    "assetBundlePatterns": [
+      "**/*"
+    ]
+  },
+  "name": "expo-mega-demo"
+}
