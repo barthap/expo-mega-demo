@@ -2,7 +2,26 @@
   "expo": {
     "name": "expo-mega-demo",
     "slug": "expo-mega-demo",
-    "version": "1.0.0",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "updates": {
+      "fallbackToCacheTimeout": 0
+    },
+    "ios": {
+      "supportsTablet": false
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#FFFFFF"
+      }
+    },
     "assetBundlePatterns": ["**/*"],
     "plugins": ["./custom_native_modules/expo-music-picker/app.plugin"]
   },
