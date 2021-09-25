@@ -49,6 +49,7 @@ class PickerDelegate: NSObject, MPMediaPickerControllerDelegate {
         let song = mediaItemCollection.items[0]
         
         let result: NSDictionary = [
+          "canceled": false,
           "artist": song.artist as Any,
           "uri": song.assetURL?.absoluteString as Any,
           "title": song.title as Any
@@ -62,7 +63,9 @@ class PickerDelegate: NSObject, MPMediaPickerControllerDelegate {
   public func mediaPickerDidCancel(_ mediaPicker: MPMediaPickerController) {
     DispatchQueue.main.async {
       mediaPicker.dismiss(animated: true, completion: {
-        self.promise.resolve()
+        self.promise.resolve([
+          "canceled": true
+        ])
       })
     }
   }

@@ -2,13 +2,28 @@ import { UnavailabilityError } from "expo-modules-core";
 
 import ExpoMusicPicker from "./ExpoMusicPicker";
 
-type MusicPickerType = {
-  openPicker(options: any): Promise<any>;
-  sayHello(): Promise<string>;
-};
+export interface Song {
+  uri: string;
+  title: string;
+  artist: string | null;
+}
 
-const MusicPicker: MusicPickerType = {
-  async openPicker(options: any = {}): Promise<any> {
+interface PickerResultBase {
+  canceled: boolean;
+}
+
+interface PickerResultCanceled extends PickerResultBase {
+  canceled: true;
+}
+
+interface PickerResultSuccess extends PickerResultBase, Song {
+  canceled: false;
+}
+
+type PickerResult = PickerResultSuccess | PickerResultCanceled;
+
+const MusicPicker = {
+  async openPicker(options: any = {}): Promise<PickerResult> {
     if (!ExpoMusicPicker.openPicker) {
       throw new UnavailabilityError("expo-music-picker", "openPicker");
     }
@@ -25,4 +40,4 @@ const MusicPicker: MusicPickerType = {
   },
 };
 
-export default MusicPicker as MusicPickerType;
+export default MusicPicker;

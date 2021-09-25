@@ -2,7 +2,9 @@ import { StatusBar } from "expo-status-bar";
 import React from "react";
 import { Button, StyleSheet, Text, View } from "react-native";
 
-import MusicPicker from "../custom_native_modules/expo-music-picker/src/MusicPicker";
+import MusicPicker, {
+  Song,
+} from "../custom_native_modules/expo-music-picker/src/MusicPicker";
 import { Audio } from "../custom_native_modules/expo-av-jsi/src";
 import Reanimated, {
   Extrapolate,
@@ -13,8 +15,12 @@ import Reanimated, {
 } from "react-native-reanimated";
 import { cfft } from "./fft";
 
+function prepareSongDisplayName({ artist, title }: Song) {
+  return artist ? `${artist} - ${title}` : title;
+}
+
 export default function App() {
-  const [result, setResult] = React.useState("loading...");
+  const [result, setResult] = React.useState("None yet...");
   const [sound, setSound] = React.useState<Audio.Sound>();
   const [uri, setUri] = React.useState("");
 
@@ -35,8 +41,13 @@ export default function App() {
   const onClick = async () => {
     const song = await MusicPicker.openPicker({});
     console.log(song);
+
+    if (song.canceled != false) {
+      return;
+    }
+
     setUri(song.uri);
-    setResult(JSON.stringify(song, null, 2));
+    setResult(prepareSongDisplayName(song));
   };
 
   async function playSound() {
