@@ -8,7 +8,7 @@ require 'json'
 podfile_properties = JSON.parse(File.read('./Podfile.properties.json')) rescue {}
 
 target 'expomegademo' do
-  use_expo_modules!
+  use_expo_modules!(modules_paths: ['../node_modules', '../custom_native_modules'])
   config = use_native_modules!
 
   use_react_native!(
