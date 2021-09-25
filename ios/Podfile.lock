@@ -340,7 +340,7 @@ PODS:
 DEPENDENCIES:
   - DoubleConversion (from `../node_modules/react-native/third-party-podspecs/DoubleConversion.podspec`)
   - EXApplication (from `../node_modules/expo-application/ios`)
-  - EXAV (from `../custom_native_modules/expo-av/ios`)
+  - EXAV (from `../custom_native_modules/expo-av-jsi/ios`)
   - EXConstants (from `../node_modules/expo-constants/ios`)
   - EXFileSystem (from `../node_modules/expo-file-system/ios`)
   - EXFont (from `../node_modules/expo-font/ios`)
@@ -398,7 +398,7 @@ EXTERNAL SOURCES:
   EXApplication:
     :path: "../node_modules/expo-application/ios"
   EXAV:
-    :path: "../custom_native_modules/expo-av/ios"
+    :path: "../custom_native_modules/expo-av-jsi/ios"
   EXConstants:
     :path: "../node_modules/expo-constants/ios"
   EXFileSystem:
@@ -492,7 +492,7 @@ SPEC CHECKSUMS:
   boost-for-react-native: 39c7adb57c4e60d6c5479dd8623128eb5b3f0f2c
   DoubleConversion: cf9b38bf0b2d048436d9a82ad2abe1404f11e7de
   EXApplication: d99a1ecb99dfb63dab8acb66d0181857ee79b25f
-  EXAV: c2104675be0dd041cb7ec6e44a4560c4e823c053
+  EXAV: 0f185c5ff32969fa0b3b00ab174908ac247963a1
   EXConstants: d948a2e8be3ccc5abdc9cda7a45169329b05b6f9
   EXFileSystem: 42ca55f780417fddd5f92ad01bdc5a55ccbaad7c
   EXFont: d85c861ebfe3fafcb8046cafe52242542b6a35d7
