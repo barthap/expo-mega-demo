@@ -23,7 +23,10 @@
       }
     },
     "assetBundlePatterns": ["**/*"],
-    "plugins": ["./custom_native_modules/expo-music-picker/app.plugin"]
+    "plugins": [
+      "./custom_native_modules/expo-music-picker/app.plugin",
+      "./custom_native_modules/link-custom-modules.plugin"
+    ]
   },
   "name": "expo-mega-demo"
 }
