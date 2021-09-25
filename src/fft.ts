@@ -53,10 +53,9 @@ export function cfft(amplitudes: number[]): Complex[] {
   if (N <= 1) return amplitudes;
 
   const hN = N / 2;
-  let even: (Complex | number)[] = [];
-  let odd: (Complex | number)[] = [];
-  even.length = hN;
-  odd.length = hN;
+  let even: (Complex | number)[] = Array(hN);
+  let odd: (Complex | number)[] = Array(hN);
+
   for (let i = 0; i < hN; ++i) {
     even[i] = amplitudes[i * 2];
     odd[i] = amplitudes[i * 2 + 1];

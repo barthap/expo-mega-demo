@@ -22,14 +22,11 @@ function prepareSongDisplayName({ artist, title }: Song) {
 export default function App() {
   const [result, setResult] = React.useState("None yet...");
   const [sound, setSound] = React.useState<Audio.Sound>();
-  const [uri, setUri] = React.useState("");
 
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const bins = [...new Array(8)].map(() => useSharedValue(1));
 
   React.useEffect(() => {
-    //MusicPicker.sayHello().then(setResult);
-
     return sound
       ? () => {
           console.log("Unloading Sound");
@@ -38,7 +35,7 @@ export default function App() {
       : undefined;
   }, [sound]);
 
-  const onClick = async () => {
+  const openPicker = async () => {
     const song = await MusicPicker.openPicker({});
     console.log(song);
 
@@ -46,11 +43,11 @@ export default function App() {
       return;
     }
 
-    setUri(song.uri);
+    loadSound(song.uri);
     setResult(prepareSongDisplayName(song));
   };
 
-  async function playSound() {
+  async function loadSound(uri: string) {
     console.log("Loading Sound");
     const { sound } = await Audio.Sound.createAsync({
       uri,
@@ -71,13 +68,15 @@ export default function App() {
     };
 
     setSound(sound);
+  }
 
+  async function startPlaying() {
     console.log("Playing Sound");
     await sound.playAsync();
   }
 
   async function stopPlaying() {
-    sound?.pauseAsync();
+    await sound?.pauseAsync();
   }
 
   const animatedStyles: any[] = new Array(8);
@@ -99,8 +98,8 @@ export default function App() {
   return (
     <View style={styles.container}>
       <Text>Result: {result}</Text>
-      <Button onPress={onClick} title="Open picker" />
-      <Button title="Play Sound" onPress={playSound} />
+      <Button onPress={openPicker} title="Open picker" />
+      <Button title="Play Sound" onPress={startPlaying} />
       <Button title="Pause" onPress={stopPlaying} />
       <StatusBar style="auto" />
       <View style={styles.binContainer}>
