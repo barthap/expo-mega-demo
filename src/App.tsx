@@ -2,8 +2,8 @@ import { StatusBar } from "expo-status-bar";
 import React from "react";
 import { Button, StyleSheet, Text, View } from "react-native";
 
-import MusicPicker from "./custom_native_modules/expo-music-picker/src/MusicPicker";
-import { Audio } from "./custom_native_modules/expo-av-jsi/src";
+import MusicPicker from "../custom_native_modules/expo-music-picker/src/MusicPicker";
+import { Audio } from "../custom_native_modules/expo-av-jsi/src";
 import Reanimated, {
   Extrapolate,
   interpolate,
