@@ -106,36 +106,15 @@ export default function PlayerScreen() {
       );
 
       if (freqs.some(isNaN)) return;
-
-      // sss++;
-      // if (sss === 100) {
-      //   capturedSamples = sample.channels[0].frames.slice(0, FFT_SIZE);
-      //   capturedFftMag = freqs;
-      //   console.log("captured");
-      // }
-
-      // const normalizedBins = normalizeUsingSum(
-      //   exponentBinsForSamples(freqs, NUM_BINS, N_SAMPLES_TO_PROCESS)
-      // ).map((i) => i * 5);
-
-      // const normalizedBins = quadraticBinsForSamplesOptimal(
-      //   freqs,
-      //   NUM_BINS,
-      //   N_SAMPLES_TO_PROCESS
-      // );
-
-      const normalizedBins = calculateBins(freqs);
-
-      // console.log(normalizedBins);
+      const binValues = calculateBins(freqs);
 
       for (let i = 0; i < NUM_BINS; i++) {
         let inRange = [0, 4];
         if (i === 0) inRange = [0, 25];
 
-        const fbin = normalizedBins[i];
-        // const fbin =
-        //   freqs.slice(i * 64, (i + 1) * 64).reduce((a, b) => a + b, 0) / 64;
-        // bins[i].value = interpolate(fbin, inRange, [1, 300], Extrapolate.CLAMP);
+        // this cannot be put directly iside interpolate()
+        // we must extract outside
+        const fbin = binValues[i];
         bins[i].value = interpolate(
           fbin,
           [0, 90, 200],

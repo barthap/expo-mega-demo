@@ -96,48 +96,27 @@ export function normalizeUsingSum(bins: number[]): number[] {
   return bins.map((bin) => bin / sum);
 }
 
-export function quadraticBinsForSamplesOptimal(
-  fftSamples: number[],
+/**
+ * A higher-order function. Returns a function which converts fft samples
+ * into `numBins` frequency bins, using logarythmic scale
+ *
+ * It opts-out of functional calculations, because of performance reasons
+ * It has to be fast, it is called very frequently
+ */
+export function makeOptimalQuadraticBinsForSamples(
   numBins: number,
-  sliceAt = fftSamples.length
+  sliceAt: number
 ) {
   const convWidth = sliceAt / numBins;
   const halfWidth = convWidth / 2;
-  const results: number[] = new Array(numBins).fill(1);
   const indexRemap = generateLogIndexArray(20, sliceAt);
 
-  let sum = 0;
-  for (let i = 0; i < numBins; i++) {
-    // step = convWidth
-    const x0 = (i + 1) * convWidth;
-    results[i] = 0;
-    for (let j = 0; j < sliceAt; j++) {
-      let k = indexRemap[j];
-      results[i] +=
-        fftSamples[k] *
-        Math.max(0, (-1 / (halfWidth * halfWidth)) * (k - x0) * (k - x0) + 1);
-    }
-
-    sum += results[i];
-  }
-  if (sum === 0) sum = 1;
-
-  for (let i = 0; i < numBins; i++) results[i] = (results[i] / sum) * 5;
-  return results;
-}
-
-export function makeOptimalQuadraticBinsForSamples(numBins: number, sliceAt) {
-  const convWidth = sliceAt / numBins;
-  const halfWidth = convWidth / 2;
-  const indexRemap = generateLogIndexArray(20, sliceAt);
-
-  return (fftSamples) => {
-    const results: number[] = new Array(numBins).fill(1);
+  return (fftSamples: number[]) => {
+    const results = new Array<number>(numBins).fill(0);
     // let sum = 0;
     for (let i = 0; i < numBins; i++) {
       // step = convWidth
       const x0 = (i + 1) * convWidth;
-      results[i] = 0;
       for (let j = 0; j < sliceAt; j++) {
         let k = indexRemap[j];
         results[i] +=

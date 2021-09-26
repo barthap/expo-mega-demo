@@ -51,7 +51,12 @@ export default function Navigation() {
         screenOptions={{
           header: (props) => (
             <>
-              <TopNavigation title={props.route.name} alignment="center" />
+              <TopNavigation
+                title={props.route.name}
+                alignment="center"
+                // @ts-expect-error Put the UI kitten header components instead
+                accessoryRight={props.options.headerRight}
+              />
               <Divider />
             </>
           ),
