@@ -1,6 +1,6 @@
 import React from "react";
-import { KeyboardAvoidingView, Platform, StyleSheet, View } from "react-native";
-import { Layout, Text, Button, Input } from "@ui-kitten/components";
+import { KeyboardAvoidingView, Platform, StyleSheet } from "react-native";
+import { Layout, Text, Button, Input, Icon } from "@ui-kitten/components";
 import shallow from "zustand/shallow";
 import { useDevicesStore } from "../BluetoothManager";
 import { isDeviceSupported, sendCommandTo } from "../BluetoothDevice";

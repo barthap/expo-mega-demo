@@ -15,7 +15,7 @@ export const useDevicesStore = create<State>((set, get) => ({
   isScanning: false,
 }));
 
-useDevicesStore.update = function (updater: (state: State) => void) {
+const updateStore = function (updater: (state: State) => void) {
   useDevicesStore.setState(produce(useDevicesStore.getState(), updater));
 };
 
@@ -27,13 +27,13 @@ export function doDeviceScan() {
       return;
     }
 
-    useDevicesStore.update((state) => {
+    updateStore((state) => {
       state.devices[device.id] = device;
     });
     console.log("Found", device.name, device.id);
   });
 
-  useDevicesStore.update((state) => {
+  updateStore((state) => {
     state.isScanning = true;
   });
 
@@ -44,7 +44,7 @@ export function doDeviceScan() {
 
 export function stopScanning() {
   console.log("Stopped scanning");
-  useDevicesStore.update((state) => {
+  updateStore((state) => {
     state.isScanning = false;
   });
   BluetoothManager.stopDeviceScan();
@@ -54,7 +54,7 @@ export async function connect(deviceToConnect: Device) {
   const connected = await deviceToConnect.connect();
   const device = await connected.discoverAllServicesAndCharacteristics();
   console.log("Connected to", device.name);
-  useDevicesStore.update((state) => {
+  updateStore((state) => {
     state.connectedDevice = device;
   });
 }
@@ -64,7 +64,7 @@ export function disconnect() {
   if (!dev) return;
 
   BluetoothManager.cancelDeviceConnection(dev.id);
-  useDevicesStore.update((state) => {
+  updateStore((state) => {
     state.connectedDevice = null;
   });
   console.log("Disconnected");

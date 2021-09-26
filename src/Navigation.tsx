@@ -12,8 +12,6 @@ import {
   BottomNavigationTab,
   Icon,
   TopNavigation,
-  Layout,
-  Text,
   Divider,
 } from "@ui-kitten/components";
 import RGBControlScreen from "./screens/RGBControlScreen";
@@ -34,6 +32,7 @@ const BottomTabBar = ({
       return (
         <BottomNavigationTab
           title={route.name}
+          // @ts-expect-error UI-Kitten passed, but typings are from react-navigation
           icon={(props) =>
             descriptors[route.key].options.tabBarIcon?.(props as any) ?? null
           }

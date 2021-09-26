@@ -1,7 +1,7 @@
 import { StatusBar } from "expo-status-bar";
 import React from "react";
-import { Button, Dimensions, StyleSheet, View } from "react-native";
-import { ApplicationProvider, Layout, Text } from "@ui-kitten/components";
+import { Button, Dimensions, StyleSheet } from "react-native";
+import { Layout, Text } from "@ui-kitten/components";
 
 import MusicPicker, {
   Song,
@@ -17,12 +17,9 @@ import Reanimated, {
 import { cfft } from "../math/fft";
 import {
   convWidthForNumBins,
-  exponentBinsForSamples,
   getBinWidth,
   ithBinToFreq,
   makeOptimalQuadraticBinsForSamples,
-  normalizeUsingSum,
-  quadraticBinsForSamplesOptimal,
 } from "../math/convolution";
 import { makeInvLogFn } from "../math/invLog";
 
@@ -140,13 +137,6 @@ export default function PlayerScreen() {
         bins[i].value = 1;
       }
     }, 500);
-    // console.log(
-    //   capturedFftMag
-    //     .slice(0, 512)
-    //     .map((f) => f.toString().slice(0, 8))
-    //     .join(",")
-    //   // capturedSamples.map((f: number) => f.toString().slice(0, 7)).join(",")
-    // );
   }
 
   const animatedStyles: any[] = new Array(NUM_BINS);
@@ -155,7 +145,6 @@ export default function PlayerScreen() {
     // eslint-disable-next-line react-hooks/rules-of-hooks
     animatedStyles[i] = useAnimatedStyle(
       () => ({
-        // height: bins[i].value,
         height: withSpring(bins[i].value, {
           mass: 1,
           damping: 500,
