@@ -10,6 +10,7 @@ import {
 } from "../BluetoothManager";
 import { DeviceList } from "../components/DeviceList";
 import { Layout, Text, Button, Card } from "@ui-kitten/components";
+import { BT05_SERVICE_UUID_PREFIX } from "../BluetoothDevice";
 
 export default function BluetoothScreen() {
   React.useEffect(() => {
@@ -50,9 +51,7 @@ export default function BluetoothScreen() {
       />
 
       <Card style={styles.card} header={Header} footer={Footer}>
-        <Text>
-          {JSON.stringify(store.connectedDevice?.manufacturerData, null, 2)}
-        </Text>
+        <Text>TODO: Device info here</Text>
       </Card>
     </Layout>
   );

@@ -3,10 +3,7 @@ import { KeyboardAvoidingView, Platform, StyleSheet, View } from "react-native";
 import { Layout, Text, Button, Input } from "@ui-kitten/components";
 import shallow from "zustand/shallow";
 import { useDevicesStore } from "../BluetoothManager";
-import { Buffer } from "buffer";
-
-const SERVICE_UUID_PREFIX = "0000ffe0"; // 0000ffe0-0000-1000-8000-00805f9b34fb
-const CHARACTERISTIC_UUID_PREFIX = "0000ffe1"; // 0000ffe1-0000-1000-8000-00805f9b34fb
+import { isDeviceSupported, sendCommandTo } from "../BluetoothDevice";
 
 export default function RGBControlScreen() {
   const [isConnected, device] = useDevicesStore(
@@ -17,19 +14,9 @@ export default function RGBControlScreen() {
   const [command, setCommand] = React.useState("");
 
   const sendCommand = async () => {
-    // SERVICE id 0xFFE0
-    // CHARACTERISTIC ID 0xFFE1
-    const services = await device?.services();
-    const serialService = services.find((it) =>
-      it.uuid.startsWith(SERVICE_UUID_PREFIX)
-    );
-    const characteristics = await serialService.characteristics();
-    const serialCharacteristic = characteristics.find((it) =>
-      it.uuid.startsWith(CHARACTERISTIC_UUID_PREFIX)
-    );
-    serialCharacteristic.writeWithoutResponse(
-      Buffer.from(`${command}\r\n`).toString("base64")
-    );
+    if (await isDeviceSupported(device)) {
+      await sendCommandTo(device, command);
+    }
 
     setCommand("");
   };
