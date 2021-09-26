@@ -2,16 +2,38 @@ import React from "react";
 import Navigation from "./Navigation";
 
 import * as eva from "@eva-design/eva";
-import { ApplicationProvider, IconRegistry } from "@ui-kitten/components";
+import {
+  ApplicationProvider,
+  IconRegistry,
+  useTheme,
+} from "@ui-kitten/components";
 import { EvaIconsPack } from "@ui-kitten/eva-icons";
+import { StatusBar } from "expo-status-bar";
+import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
+
+function ThemedSafeArea(props) {
+  const theme = useTheme();
+  return (
+    <SafeAreaView
+      {...props}
+      style={[
+        props.style,
+        { backgroundColor: theme["background-basic-color-1"] },
+      ]}
+    />
+  );
+}
 
 export default function App() {
   return (
-    <>
+    <SafeAreaProvider>
       <IconRegistry icons={EvaIconsPack} />
-      <ApplicationProvider {...eva} theme={eva.light}>
-        <Navigation />
+      <StatusBar style="dark" />
+      <ApplicationProvider {...eva} theme={eva.dark}>
+        <ThemedSafeArea style={{ flex: 1 }}>
+          <Navigation />
+        </ThemedSafeArea>
       </ApplicationProvider>
-    </>
+    </SafeAreaProvider>
   );
 }

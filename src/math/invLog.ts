@@ -11,14 +11,14 @@
 const getB = (a: number, lastSample: number) =>
   lastSample / Math.log10(lastSample / a + 1);
 
-const makeLogFn = (a: number, lastSample: number) => {
+export const makeLogFn = (a: number, lastSample: number) => {
   const b = getB(a, lastSample);
   const log10a = Math.log10(a);
 
   return (i: number) => b * (Math.log10(a + i) - log10a);
 };
 
-const makeInvLogFn = (a: number, lastSample: number) => {
+export const makeInvLogFn = (a: number, lastSample: number) => {
   const b = getB(a, lastSample);
 
   return (i: number) => a * (Math.pow(10, i / b) - 1);

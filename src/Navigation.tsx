@@ -11,8 +11,10 @@ import {
   BottomNavigation,
   BottomNavigationTab,
   Icon,
+  TopNavigation,
   Layout,
   Text,
+  Divider,
 } from "@ui-kitten/components";
 import RGBControlScreen from "./screens/RGBControlScreen";
 
@@ -44,7 +46,17 @@ const BottomTabBar = ({
 export default function Navigation() {
   return (
     <NavigationContainer>
-      <Tab.Navigator tabBar={(props) => <BottomTabBar {...props} />}>
+      <Tab.Navigator
+        tabBar={(props) => <BottomTabBar {...props} />}
+        screenOptions={{
+          header: (props) => (
+            <>
+              <TopNavigation title={props.route.name} alignment="center" />
+              <Divider />
+            </>
+          ),
+        }}
+      >
         <Tab.Screen
           name="Player"
           component={PlayerScreen}
@@ -75,6 +87,6 @@ export default function Navigation() {
 
 const styles = StyleSheet.create({
   bottomNavigation: {
-    marginBottom: 12,
+    marginBottom: 0,
   },
 });

@@ -1,6 +1,6 @@
 import { StatusBar } from "expo-status-bar";
 import React from "react";
-import { Button, StyleSheet, View } from "react-native";
+import { Button, Dimensions, StyleSheet, View } from "react-native";
 import { ApplicationProvider, Layout, Text } from "@ui-kitten/components";
 
 import MusicPicker, {
@@ -24,6 +24,7 @@ import {
   normalizeUsingSum,
   quadraticBinsForSamplesOptimal,
 } from "../math/convolution";
+import { makeInvLogFn } from "../math/invLog";
 
 function prepareSongDisplayName({ artist, title }: Song) {
   return artist ? `${artist} - ${title}` : title;
@@ -32,16 +33,27 @@ function prepareSongDisplayName({ artist, title }: Song) {
 const FFT_SIZE = 2048;
 const SAMPLING_RATE = 44100;
 const N_SAMPLES_TO_PROCESS = 256;
+const NUM_BINS = 10;
+const LOG_COEFF = 20;
+const BIN_WIDTH = getBinWidth(SAMPLING_RATE, FFT_SIZE);
 
-let capturedSamples = new Array(2048);
-let capturedFftMag = new Array(2048);
+// I realized that it will no longer work for log scale
+const DISPLAY_BIN_WIDTH =
+  convWidthForNumBins(NUM_BINS, N_SAMPLES_TO_PROCESS) * BIN_WIDTH;
+const invLog = makeInvLogFn(LOG_COEFF, N_SAMPLES_TO_PROCESS);
+const FIRST_BIN_FREQ = ithBinToFreq(BIN_WIDTH)(invLog(20));
+const MIDDLE_BIN_FREQ = ithBinToFreq(BIN_WIDTH)(
+  invLog(N_SAMPLES_TO_PROCESS / 2)
+);
+const LAST_BIN_FREQ = ithBinToFreq(DISPLAY_BIN_WIDTH)(NUM_BINS);
+const MAX_BIN_FREQ = BIN_WIDTH * N_SAMPLES_TO_PROCESS;
 
 export default function PlayerScreen() {
   const [result, setResult] = React.useState("None yet...");
   const [sound, setSound] = React.useState<Audio.Sound>();
 
   // eslint-disable-next-line react-hooks/rules-of-hooks
-  const bins = [...new Array(8)].map(() => useSharedValue(1));
+  const bins = [...new Array(NUM_BINS)].map(() => useSharedValue(1));
 
   React.useEffect(() => {
     return sound
@@ -65,19 +77,16 @@ export default function PlayerScreen() {
   };
 
   async function loadSound(uri: string) {
-    const BIN_WIDTH = getBinWidth(SAMPLING_RATE, FFT_SIZE);
     console.log("Loading Sound");
     console.log("Bin width", BIN_WIDTH);
-    console.log(
-      "Display bin width",
-      convWidthForNumBins(8, N_SAMPLES_TO_PROCESS) * BIN_WIDTH
-    );
-    console.log("Max bin freq", BIN_WIDTH * N_SAMPLES_TO_PROCESS);
+    console.log("Display bin width", DISPLAY_BIN_WIDTH);
+    console.log("Max bin freq", MAX_BIN_FREQ);
+
     const { sound } = await Audio.Sound.createAsync({
       uri,
     });
     const calculateBins = makeOptimalQuadraticBinsForSamples(
-      8,
+      NUM_BINS,
       N_SAMPLES_TO_PROCESS
     );
     sound.onAudioSampleReceived = (sample) => {
@@ -106,12 +115,12 @@ export default function PlayerScreen() {
       // }
 
       // const normalizedBins = normalizeUsingSum(
-      //   exponentBinsForSamples(freqs, 8, N_SAMPLES_TO_PROCESS)
+      //   exponentBinsForSamples(freqs, NUM_BINS, N_SAMPLES_TO_PROCESS)
       // ).map((i) => i * 5);
 
       // const normalizedBins = quadraticBinsForSamplesOptimal(
       //   freqs,
-      //   8,
+      //   NUM_BINS,
       //   N_SAMPLES_TO_PROCESS
       // );
 
@@ -119,7 +128,7 @@ export default function PlayerScreen() {
 
       // console.log(normalizedBins);
 
-      for (let i = 0; i < 8; i++) {
+      for (let i = 0; i < NUM_BINS; i++) {
         let inRange = [0, 4];
         if (i === 0) inRange = [0, 25];
 
@@ -129,8 +138,8 @@ export default function PlayerScreen() {
         // bins[i].value = interpolate(fbin, inRange, [1, 300], Extrapolate.CLAMP);
         bins[i].value = interpolate(
           fbin,
-          [0, 80, 130],
-          [1, 150, 300],
+          [0, 90, 200],
+          [1, 170, 300],
           Extrapolate.CLAMP
         );
       }
@@ -148,7 +157,7 @@ export default function PlayerScreen() {
     await sound?.pauseAsync();
 
     setTimeout(() => {
-      for (let i = 0; i < 8; i++) {
+      for (let i = 0; i < NUM_BINS; i++) {
         bins[i].value = 1;
       }
     }, 500);
@@ -161,9 +170,9 @@ export default function PlayerScreen() {
     // );
   }
 
-  const animatedStyles: any[] = new Array(8);
+  const animatedStyles: any[] = new Array(NUM_BINS);
 
-  for (let i = 0; i < 8; i++) {
+  for (let i = 0; i < NUM_BINS; i++) {
     // eslint-disable-next-line react-hooks/rules-of-hooks
     animatedStyles[i] = useAnimatedStyle(
       () => ({
@@ -185,12 +194,32 @@ export default function PlayerScreen() {
       <Button title="Play Sound" onPress={startPlaying} />
       <Button title="Pause" onPress={stopPlaying} />
       <StatusBar style="auto" />
-      <View style={styles.binContainer}>
+      <Layout level="1" style={styles.binContainer}>
         <Reanimated.View style={{ width: 0, height: 300 }} />
         {animatedStyles.map((style, idx) => (
           <Reanimated.View key={idx} style={[styles.bin, style]} />
         ))}
-      </View>
+      </Layout>
+      <Layout level="3" style={styles.xAxisLabels}>
+        <Text>
+          {FIRST_BIN_FREQ.toLocaleString(undefined, {
+            maximumFractionDigits: 0,
+          })}{" "}
+          Hz
+        </Text>
+        <Text>
+          {MIDDLE_BIN_FREQ.toLocaleString(undefined, {
+            maximumFractionDigits: 0,
+          })}{" "}
+          Hz
+        </Text>
+        <Text>
+          {(MAX_BIN_FREQ / 1000).toLocaleString(undefined, {
+            maximumFractionDigits: 1,
+          })}{" "}
+          kHz
+        </Text>
+      </Layout>
     </Layout>
   );
 }
@@ -201,23 +230,24 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  container2: {
-    flex: 1,
-    justifyContent: "center",
-    backgroundColor: "#ecf0f1",
-    padding: 8,
-  },
   binContainer: {
     flexWrap: "wrap",
     flexDirection: "row",
     height: 300,
-    backgroundColor: "#ffffff",
     justifyContent: "space-evenly",
-    alignItems: "flex-end",
+    alignItems: "stretch",
   },
   bin: {
-    width: 30,
+    width: Dimensions.get("window").width / NUM_BINS,
     backgroundColor: "#ff9900",
     alignSelf: "flex-end",
+    borderColor: "#ff7700",
+    borderRightWidth: 1,
+    borderLeftWidth: 1,
+  },
+  xAxisLabels: {
+    width: "100%",
+    flexDirection: "row",
+    justifyContent: "space-between",
   },
 });
