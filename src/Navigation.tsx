@@ -14,6 +14,7 @@ import {
   Layout,
   Text,
 } from "@ui-kitten/components";
+import RGBControlScreen from "./screens/RGBControlScreen";
 
 const Tab = createBottomTabNavigator();
 
@@ -49,6 +50,15 @@ export default function Navigation() {
           component={PlayerScreen}
           options={{
             tabBarIcon: (props) => <Icon name="music-outline" {...props} />,
+          }}
+        />
+        <Tab.Screen
+          name="RGB"
+          component={RGBControlScreen}
+          options={{
+            tabBarIcon: (props) => (
+              <Icon name="color-palette-outline" {...props} />
+            ),
           }}
         />
         <Tab.Screen

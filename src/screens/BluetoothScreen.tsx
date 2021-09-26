@@ -1,81 +1,15 @@
 import React from "react";
 import { StyleSheet, View } from "react-native";
-import { BluetoothManager } from "../BluetoothManager";
-import { Device } from "react-native-ble-plx";
-import create from "zustand";
-import { produce } from "immer";
+import {
+  BluetoothManager,
+  connect,
+  disconnect,
+  doDeviceScan,
+  stopScanning,
+  useDevicesStore,
+} from "../BluetoothManager";
 import { DeviceList } from "../components/DeviceList";
 import { Layout, Text, Button, Card } from "@ui-kitten/components";
-
-type State = {
-  devices: Record<string, Device>;
-  isScanning: boolean;
-  connectedDevice: Device | null;
-};
-const useDevicesStore = create<State>((set, get) => ({
-  devices: {},
-  connectedDevice: null,
-  isScanning: false,
-}));
-
-useDevicesStore.update = function (updater: (state: State) => void) {
-  useDevicesStore.setState(produce(useDevicesStore.getState(), updater));
-};
-
-function doDeviceScan() {
-  BluetoothManager.startDeviceScan(null, null, (error, device) => {
-    if (error) {
-      // Handle error (scanning will be stopped automatically)
-      console.error(error);
-      return;
-    }
-
-    useDevicesStore.update((state) => {
-      state.devices[device.id] = device;
-    });
-    console.log("Found", device.name, device.id);
-  });
-
-  useDevicesStore.update((state) => {
-    state.isScanning = true;
-  });
-
-  return setTimeout(() => {
-    stopScanning();
-  }, 30 * 1000);
-}
-
-function stopScanning() {
-  console.log("Stopped scanning");
-  useDevicesStore.update((state) => {
-    state.isScanning = false;
-  });
-  BluetoothManager.stopDeviceScan();
-}
-
-async function connect(deviceToConnect: Device) {
-  const connected = await deviceToConnect.connect();
-  const device = await connected.discoverAllServicesAndCharacteristics();
-  console.log("Connected to", device.name);
-  console.log(
-    "  Services:",
-    (await device.services()).map((s) => s.id)
-  );
-  useDevicesStore.update((state) => {
-    state.connectedDevice = device;
-  });
-}
-
-function disconnect() {
-  const dev = useDevicesStore.getState().connectedDevice;
-  if (!dev) return;
-
-  BluetoothManager.cancelDeviceConnection(dev.id);
-  useDevicesStore.update((state) => {
-    state.connectedDevice = null;
-  });
-  console.log("Disconnected");
-}
 
 export default function BluetoothScreen() {
   React.useEffect(() => {
