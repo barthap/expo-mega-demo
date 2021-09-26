@@ -1,4 +1,5 @@
 import { Device } from "react-native-ble-plx";
+import { Buffer } from "buffer";
 
 // UUIDs for HM-10 BLE module
 // Module page (PL): https://botland.com.pl/moduly-bluetooth/9515-modul-bluetooth-40-ble-hm-10-at-09-mlt-bt05-33v5v-5904422313524.html
