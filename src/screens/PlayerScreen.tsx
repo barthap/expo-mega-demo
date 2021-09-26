@@ -1,6 +1,7 @@
 import { StatusBar } from "expo-status-bar";
 import React from "react";
-import { Button, StyleSheet, Text, View } from "react-native";
+import { Button, StyleSheet, View } from "react-native";
+import { ApplicationProvider, Layout, Text } from "@ui-kitten/components";
 
 import MusicPicker, {
   Song,
@@ -96,7 +97,7 @@ export default function PlayerScreen() {
   }
 
   return (
-    <View style={styles.container}>
+    <Layout style={styles.container} level="2">
       <Text>Result: {result}</Text>
       <Button onPress={openPicker} title="Open picker" />
       <Button title="Play Sound" onPress={startPlaying} />
@@ -108,7 +109,7 @@ export default function PlayerScreen() {
           <Reanimated.View key={idx} style={[styles.bin, style]} />
         ))}
       </View>
-    </View>
+    </Layout>
   );
 }
 
