@@ -5,6 +5,9 @@ import shallow from "zustand/shallow";
 import { useDevicesStore } from "../BluetoothManager";
 import { Buffer } from "buffer";
 
+const SERVICE_UUID_PREFIX = "0000ffe0"; // 0000ffe0-0000-1000-8000-00805f9b34fb
+const CHARACTERISTIC_UUID_PREFIX = "0000ffe1"; // 0000ffe1-0000-1000-8000-00805f9b34fb
+
 export default function RGBControlScreen() {
   const [isConnected, device] = useDevicesStore(
     (state) => [state.connectedDevice != null, state.connectedDevice],
@@ -17,12 +20,12 @@ export default function RGBControlScreen() {
     // SERVICE id 0xFFE0
     // CHARACTERISTIC ID 0xFFE1
     const services = await device?.services();
-    console.log(services.map(({ id, uuid }) => ({ id, uuid })));
-    const serialService = services.find((it) => it.uuid.startsWith("0000ffe0"));
+    const serialService = services.find((it) =>
+      it.uuid.startsWith(SERVICE_UUID_PREFIX)
+    );
     const characteristics = await serialService.characteristics();
-    console.log(characteristics.map(({ id, uuid }) => ({ id, uuid })));
     const serialCharacteristic = characteristics.find((it) =>
-      it.uuid.startsWith("0000ffe1")
+      it.uuid.startsWith(CHARACTERISTIC_UUID_PREFIX)
     );
     serialCharacteristic.writeWithoutResponse(
       Buffer.from(`${command}\r\n`).toString("base64")
@@ -53,11 +56,18 @@ export default function RGBControlScreen() {
           <Input
             style={styles.input}
             placeholder="Enter command here"
-            value={command}
+            // value={command}
             onChangeText={setCommand}
             onSubmitEditing={sendCommand}
+            disabled={!isConnected}
           />
-          <Button size="small" style={{ margin: 3 }} onPress={sendCommand}>
+          <Button
+            size="small"
+            style={{ margin: 3 }}
+            onPress={sendCommand}
+            disabled={!isConnected}
+            accessoryRight={<Icon name="corner-down-right-outline" />}
+          >
             Send
           </Button>
         </Layout>
@@ -68,6 +78,7 @@ export default function RGBControlScreen() {
 
 const styles = StyleSheet.create({
   container: {
+    paddingTop: 10,
     flex: 1,
     alignItems: "center",
     justifyContent: "space-between",

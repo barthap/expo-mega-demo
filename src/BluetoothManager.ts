@@ -54,10 +54,6 @@ export async function connect(deviceToConnect: Device) {
   const connected = await deviceToConnect.connect();
   const device = await connected.discoverAllServicesAndCharacteristics();
   console.log("Connected to", device.name);
-  console.log(
-    "  Services:",
-    (await device.services()).map((s) => s.id)
-  );
   useDevicesStore.update((state) => {
     state.connectedDevice = device;
   });

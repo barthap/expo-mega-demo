@@ -14,11 +14,27 @@ import Reanimated, {
   useSharedValue,
   withSpring,
 } from "react-native-reanimated";
-import { cfft } from "../fft";
+import { cfft } from "../math/fft";
+import {
+  convWidthForNumBins,
+  exponentBinsForSamples,
+  getBinWidth,
+  ithBinToFreq,
+  makeOptimalQuadraticBinsForSamples,
+  normalizeUsingSum,
+  quadraticBinsForSamplesOptimal,
+} from "../math/convolution";
 
 function prepareSongDisplayName({ artist, title }: Song) {
   return artist ? `${artist} - ${title}` : title;
 }
+
+const FFT_SIZE = 2048;
+const SAMPLING_RATE = 44100;
+const N_SAMPLES_TO_PROCESS = 256;
+
+let capturedSamples = new Array(2048);
+let capturedFftMag = new Array(2048);
 
 export default function PlayerScreen() {
   const [result, setResult] = React.useState("None yet...");
@@ -49,22 +65,74 @@ export default function PlayerScreen() {
   };
 
   async function loadSound(uri: string) {
+    const BIN_WIDTH = getBinWidth(SAMPLING_RATE, FFT_SIZE);
     console.log("Loading Sound");
+    console.log("Bin width", BIN_WIDTH);
+    console.log(
+      "Display bin width",
+      convWidthForNumBins(8, N_SAMPLES_TO_PROCESS) * BIN_WIDTH
+    );
+    console.log("Max bin freq", BIN_WIDTH * N_SAMPLES_TO_PROCESS);
     const { sound } = await Audio.Sound.createAsync({
       uri,
     });
+    const calculateBins = makeOptimalQuadraticBinsForSamples(
+      8,
+      N_SAMPLES_TO_PROCESS
+    );
     sound.onAudioSampleReceived = (sample) => {
-      const freqs = cfft(sample.channels[0].frames.slice(0, 2048)).map((n) =>
-        n.mag()
+      // sample rate = 44.1 kHz
+      // picking 2048 samples -> 1024 usable bins
+      // FFT bandwidth = sample_rate / 2 = 22.05 kHz
+      // Bin width = bandwidth / 1024 bins = ~21 Hz - and that is our resolution
+      // ----
+      // we divide it into 8 bins (bandwidth / (1024/8) --> 21 Hz * 8 = 168 Hz Bin width)
+      // mih freq = 168/2 = 84Hz
+      // ---
+      // but let's take 512 of these bins (bandwidth = 11 kHz)
+      // then single original bin width = 21Hz (still)
+      // we just ignore the higher part
+      const freqs = cfft(sample.channels[0].frames.slice(0, FFT_SIZE)).map(
+        (n) => n.mag()
       );
+
+      if (freqs.some(isNaN)) return;
+
+      // sss++;
+      // if (sss === 100) {
+      //   capturedSamples = sample.channels[0].frames.slice(0, FFT_SIZE);
+      //   capturedFftMag = freqs;
+      //   console.log("captured");
+      // }
+
+      // const normalizedBins = normalizeUsingSum(
+      //   exponentBinsForSamples(freqs, 8, N_SAMPLES_TO_PROCESS)
+      // ).map((i) => i * 5);
+
+      // const normalizedBins = quadraticBinsForSamplesOptimal(
+      //   freqs,
+      //   8,
+      //   N_SAMPLES_TO_PROCESS
+      // );
+
+      const normalizedBins = calculateBins(freqs);
+
+      // console.log(normalizedBins);
 
       for (let i = 0; i < 8; i++) {
         let inRange = [0, 4];
         if (i === 0) inRange = [0, 25];
 
-        const fbin =
-          freqs.slice(i * 64, (i + 1) * 64).reduce((a, b) => a + b, 0) / 64;
-        bins[i].value = interpolate(fbin, inRange, [1, 300], Extrapolate.CLAMP);
+        const fbin = normalizedBins[i];
+        // const fbin =
+        //   freqs.slice(i * 64, (i + 1) * 64).reduce((a, b) => a + b, 0) / 64;
+        // bins[i].value = interpolate(fbin, inRange, [1, 300], Extrapolate.CLAMP);
+        bins[i].value = interpolate(
+          fbin,
+          [0, 80, 130],
+          [1, 150, 300],
+          Extrapolate.CLAMP
+        );
       }
     };
 
@@ -78,6 +146,19 @@ export default function PlayerScreen() {
 
   async function stopPlaying() {
     await sound?.pauseAsync();
+
+    setTimeout(() => {
+      for (let i = 0; i < 8; i++) {
+        bins[i].value = 1;
+      }
+    }, 500);
+    // console.log(
+    //   capturedFftMag
+    //     .slice(0, 512)
+    //     .map((f) => f.toString().slice(0, 8))
+    //     .join(",")
+    //   // capturedSamples.map((f: number) => f.toString().slice(0, 7)).join(",")
+    // );
   }
 
   const animatedStyles: any[] = new Array(8);
@@ -86,6 +167,7 @@ export default function PlayerScreen() {
     // eslint-disable-next-line react-hooks/rules-of-hooks
     animatedStyles[i] = useAnimatedStyle(
       () => ({
+        // height: bins[i].value,
         height: withSpring(bins[i].value, {
           mass: 1,
           damping: 500,
