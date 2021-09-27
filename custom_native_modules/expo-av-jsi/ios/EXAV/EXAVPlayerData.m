@@ -208,7 +208,7 @@ NSString *const EXAVPlayerDataObserverMetadataKeyPath = @"timedMetadata";
         MTAudioProcessingTapCallbacks callbacks;
 
         callbacks.version = kMTAudioProcessingTapCallbacksVersion_0;
-        callbacks.clientInfo = (__bridge void *)self,
+        callbacks.clientInfo = (__bridge void *)self;
         callbacks.init = tapInit;
         callbacks.finalize = tapFinalize;
         callbacks.prepare = tapPrepare;

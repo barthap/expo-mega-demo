@@ -24,6 +24,10 @@ export const makeInvLogFn = (a: number, lastSample: number) => {
   return (i: number) => a * (Math.pow(10, i / b) - 1);
 };
 
+/**
+ * Generated logarythmic index remap array to be kept in memory
+ * to minimalize runtime calculation overhead
+ */
 export function generateLogIndexArray(a: number, size: number): number[] {
   const invLog = makeLogFn(a, size);
   return new Array(size).fill(undefined).map((_, i) => {

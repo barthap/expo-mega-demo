@@ -1,6 +1,6 @@
 import { StatusBar } from "expo-status-bar";
 import React from "react";
-import { Button, Dimensions, StyleSheet } from "react-native";
+import { Button, Dimensions, StyleSheet, View } from "react-native";
 import { Layout, Text } from "@ui-kitten/components";
 
 import MusicPicker, {
@@ -22,6 +22,8 @@ import {
   makeOptimalQuadraticBinsForSamples,
 } from "../math/convolution";
 import { makeInvLogFn } from "../math/invLog";
+import AudioSpectrum from "../components/AudioSpectrum";
+import { useMeasure } from "../components/picker/useMeasure";
 
 function prepareSongDisplayName({ artist, title }: Song) {
   return artist ? `${artist} - ${title}` : title;
@@ -39,10 +41,6 @@ const DISPLAY_BIN_WIDTH =
   convWidthForNumBins(NUM_BINS, N_SAMPLES_TO_PROCESS) * BIN_WIDTH;
 const invLog = makeInvLogFn(LOG_COEFF, N_SAMPLES_TO_PROCESS);
 const FIRST_BIN_FREQ = ithBinToFreq(BIN_WIDTH)(invLog(20));
-const MIDDLE_BIN_FREQ = ithBinToFreq(BIN_WIDTH)(
-  invLog(N_SAMPLES_TO_PROCESS / 2)
-);
-const LAST_BIN_FREQ = ithBinToFreq(DISPLAY_BIN_WIDTH)(NUM_BINS);
 const MAX_BIN_FREQ = BIN_WIDTH * N_SAMPLES_TO_PROCESS;
 
 export default function PlayerScreen() {
@@ -115,7 +113,7 @@ export default function PlayerScreen() {
         bins[i].value = interpolate(
           fbin,
           [0, 90, 200],
-          [1, 170, 300],
+          [1, 60, 100],
           Extrapolate.CLAMP
         );
       }
@@ -139,21 +137,7 @@ export default function PlayerScreen() {
     }, 500);
   }
 
-  const animatedStyles: any[] = new Array(NUM_BINS);
-
-  for (let i = 0; i < NUM_BINS; i++) {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    animatedStyles[i] = useAnimatedStyle(
-      () => ({
-        height: withSpring(bins[i].value, {
-          mass: 1,
-          damping: 500,
-          stiffness: 1000,
-        }),
-      }),
-      [bins[i]]
-    );
-  }
+  const [dim, onLayout] = useMeasure();
 
   return (
     <Layout style={styles.container} level="2">
@@ -161,33 +145,13 @@ export default function PlayerScreen() {
       <Button onPress={openPicker} title="Open picker" />
       <Button title="Play Sound" onPress={startPlaying} />
       <Button title="Pause" onPress={stopPlaying} />
-      <StatusBar style="auto" />
-      <Layout level="1" style={styles.binContainer}>
-        <Reanimated.View style={{ width: 0, height: 300 }} />
-        {animatedStyles.map((style, idx) => (
-          <Reanimated.View key={idx} style={[styles.bin, style]} />
-        ))}
-      </Layout>
-      <Layout level="3" style={styles.xAxisLabels}>
-        <Text>
-          {FIRST_BIN_FREQ.toLocaleString(undefined, {
-            maximumFractionDigits: 0,
-          })}{" "}
-          Hz
-        </Text>
-        <Text>
-          {MIDDLE_BIN_FREQ.toLocaleString(undefined, {
-            maximumFractionDigits: 0,
-          })}{" "}
-          Hz
-        </Text>
-        <Text>
-          {(MAX_BIN_FREQ / 1000).toLocaleString(undefined, {
-            maximumFractionDigits: 1,
-          })}{" "}
-          kHz
-        </Text>
-      </Layout>
+      <View style={{ flex: 1 }} onLayout={onLayout}>
+        <AudioSpectrum
+          height={dim.height}
+          bins={bins}
+          frequencyRange={[FIRST_BIN_FREQ, MAX_BIN_FREQ]}
+        />
+      </View>
     </Layout>
   );
 }
@@ -197,25 +161,5 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
-  },
-  binContainer: {
-    flexWrap: "wrap",
-    flexDirection: "row",
-    height: 300,
-    justifyContent: "space-evenly",
-    alignItems: "stretch",
-  },
-  bin: {
-    width: Dimensions.get("window").width / NUM_BINS,
-    backgroundColor: "#ff9900",
-    alignSelf: "flex-end",
-    borderColor: "#ff7700",
-    borderRightWidth: 1,
-    borderLeftWidth: 1,
-  },
-  xAxisLabels: {
-    width: "100%",
-    flexDirection: "row",
-    justifyContent: "space-between",
   },
 });
