@@ -31,6 +31,7 @@ const BottomTabBar = ({
     {state.routes.map((route) => {
       return (
         <BottomNavigationTab
+          key={route.key}
           title={route.name}
           // @ts-expect-error UI-Kitten passed, but typings are from react-navigation
           icon={(props) =>
