@@ -1,5 +1,5 @@
 import React from "react";
-import { SafeAreaView, StyleSheet, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import Animated, {
   processColor,
   SharedValue,
@@ -7,7 +7,8 @@ import Animated, {
   useDerivedValue,
 } from "react-native-reanimated";
 import { hsv2rgb } from "react-native-redash";
-import { rgb2hex } from "./Hue";
+import { rgb2hex } from "./colorUtils";
+import { CANVAS_SIZE } from "./Picker";
 
 import Slider from "./Slider";
 
@@ -46,28 +47,34 @@ interface HeaderProps {
 }
 
 export default ({ backgroundColor, h, s, v, onGestureEnd }: HeaderProps) => {
-  const bg2 = useDerivedValue(() => {
+  const fullySaturatedColor = useDerivedValue(() => {
     const { r, g, b } = hsv2rgb(h.value, s.value, 1);
     return processColor(rgb2hex(r, g, b));
   }, [h, s]);
-  const bg2Style = useAnimatedStyle(() => {
+  const fullySaturatedStyle = useAnimatedStyle(() => {
     return {
-      backgroundColor: bg2.value,
+      backgroundColor: fullySaturatedColor.value,
     };
-  }, [bg2]);
+  }, [fullySaturatedColor]);
 
   return (
     <View>
-      <Animated.View style={bg2Style}>
-        <SafeAreaView>
-          <View style={styles.container}>
-            <View style={styles.side}>
-              <Animated.Text style={[styles.name]}>Living Room</Animated.Text>
-            </View>
+      <Animated.View style={fullySaturatedStyle}>
+        <View style={styles.container}>
+          <View style={styles.side}>
+            <Animated.Text style={[styles.name]}>Living Room</Animated.Text>
           </View>
-        </SafeAreaView>
+        </View>
       </Animated.View>
-      <Slider {...{ v, bg1: backgroundColor, bg2, onGestureEnd }} />
+      <Slider
+        {...{
+          v,
+          bg1: backgroundColor,
+          bg2: fullySaturatedColor,
+          onGestureEnd,
+          width: CANVAS_SIZE,
+        }}
+      />
     </View>
   );
 };

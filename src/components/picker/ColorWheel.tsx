@@ -5,26 +5,7 @@ import { StyleSheet, View } from "react-native";
 import { Surface } from "gl-react-expo";
 // @ts-ignore
 import { GLSL, Node, Shaders } from "gl-react";
-import {
-  processColor,
-  useDerivedValue,
-  useSharedValue,
-} from "react-native-reanimated";
-
-import Picker, { CANVAS_SIZE } from "./Picker";
-import Header from "./Header";
-import { hsv2rgb } from "react-native-redash";
-import { RGB } from "colorsys";
-
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: "space-around",
-  },
-  surface: {
-    width: CANVAS_SIZE,
-    height: CANVAS_SIZE,
-  },
   hue: {
     alignSelf: "center",
   },
@@ -69,46 +50,17 @@ void main() {
   },
 });
 
-export function rgb2hex(r, g, b) {
-  "worklet";
-  r = Math.round(r).toString(16);
-  g = Math.round(g).toString(16);
-  b = Math.round(b).toString(16);
-
-  r = r.length === 1 ? "0" + r : r;
-  g = g.length === 1 ? "0" + g : g;
-  b = b.length === 1 ? "0" + b : b;
-
-  return "#" + r + g + b;
-}
-
 interface Props {
-  onColorChange?: (rgb: RGB) => void;
+  canvasSize: number;
+  pickerComponent?: React.ReactNode;
 }
-export default ({ onColorChange }: Props) => {
-  const h = useSharedValue(0);
-  const s = useSharedValue(0);
-  const v = useSharedValue(1);
-  const backgroundColor = useDerivedValue(() => {
-    const { r, g, b } = hsv2rgb(h.value, s.value, v.value);
-    return processColor(rgb2hex(r, g, b));
-  }, [h, s, v]);
-
-  const colorChanged = () => {
-    const rgb = hsv2rgb(h.value, s.value, v.value);
-    onColorChange?.(rgb);
-    console.log(rgb);
-  };
-
+export default ({ canvasSize, pickerComponent }: Props) => {
   return (
-    <View style={styles.container}>
-      <Header {...{ backgroundColor, h, s, v }} onGestureEnd={colorChanged} />
-      <View style={styles.hue}>
-        <Surface style={styles.surface}>
-          <Node shader={shaders.hue} />
-        </Surface>
-        {<Picker {...{ h, s, backgroundColor }} onGestureEnd={colorChanged} />}
-      </View>
+    <View style={styles.hue}>
+      <Surface style={{ width: canvasSize, height: canvasSize }}>
+        <Node shader={shaders.hue} />
+      </Surface>
+      {pickerComponent}
     </View>
   );
 };

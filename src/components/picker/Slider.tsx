@@ -1,11 +1,6 @@
 import React from "react";
-import { Dimensions, StyleSheet, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import Animated, {
-  Value,
-  diffClamp,
-  divide,
-  set,
-  useCode,
   SharedValue,
   useSharedValue,
   useAnimatedStyle,
@@ -15,25 +10,25 @@ import Animated, {
 import { PanGestureHandler } from "react-native-gesture-handler";
 import { clamp } from "react-native-redash";
 
-const { width } = Dimensions.get("window");
-const SIZE = 30;
-const upperBound = width - SIZE;
+const KNOB_SIZE = 30;
 const styles = StyleSheet.create({
   container: {
-    borderRadius: SIZE / 2,
+    borderRadius: KNOB_SIZE / 2,
   },
   cursor: {
-    width: SIZE,
-    height: SIZE,
-    borderRadius: SIZE / 2,
+    width: KNOB_SIZE,
+    height: KNOB_SIZE,
+    borderRadius: KNOB_SIZE / 2,
     backgroundColor: "white",
+    borderColor: "#333",
+    borderWidth: 1,
   },
   background: {
     position: "absolute",
     top: 0,
     left: 0,
     right: 0,
-    height: SIZE / 2,
+    height: KNOB_SIZE / 2,
   },
 });
 
@@ -42,17 +37,19 @@ interface SliderProps {
   bg1: SharedValue<number>;
   bg2: SharedValue<number>;
   onGestureEnd?: () => void;
+  width: number;
 }
 
-export default ({ v, bg1, bg2, onGestureEnd }: SliderProps) => {
-  const translationX = useSharedValue(0);
+export default ({ v, bg1, bg2, onGestureEnd, width }: SliderProps) => {
+  const upperBound = width - KNOB_SIZE;
+  const translationX = useSharedValue(upperBound);
 
   const gestureHandler = useAnimatedGestureHandler({
     onStart(_, ctx: { start: number }) {
       ctx.start = translationX.value;
     },
     onActive(event, ctx) {
-      const newX = ctx.start + event.translationX;
+      const newX = clamp(ctx.start + event.translationX, 0, upperBound);
 
       translationX.value = newX;
       v.value = translationX.value / upperBound;

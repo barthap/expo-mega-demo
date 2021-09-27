@@ -4,7 +4,7 @@ import { Layout, Text, Button, Input, Icon } from "@ui-kitten/components";
 import shallow from "zustand/shallow";
 import { useDevicesStore } from "../BluetoothManager";
 import { isDeviceSupported, sendCommandTo } from "../BluetoothDevice";
-import ColorPicker from "../components/picker/Hue";
+import ColorPicker from "../components/picker/ColorPicker";
 import { RGB } from "colorsys";
 
 export default function RGBControlScreen() {
@@ -23,8 +23,9 @@ export default function RGBControlScreen() {
     setCommand("");
   };
 
-  const sendRgb = async ({ r, g, b }: RGB) => {
-    if (await isDeviceSupported(device)) {
+  const sendRgb = async ({ rgb }) => {
+    if (isConnected && (await isDeviceSupported(device))) {
+      const { r, g, b } = rgb;
       await sendCommandTo(device, `RGB ${r} ${g} ${b}`);
     }
   };
