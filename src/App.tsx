@@ -10,6 +10,7 @@ import {
 import { EvaIconsPack } from "@ui-kitten/eva-icons";
 import { StatusBar } from "expo-status-bar";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
+import { default as theme } from "../assets/custom-theme.json";
 
 function ThemedSafeArea(props) {
   const theme = useTheme();
@@ -29,7 +30,7 @@ export default function App() {
     <SafeAreaProvider>
       <IconRegistry icons={EvaIconsPack} />
       <StatusBar style="dark" />
-      <ApplicationProvider {...eva} theme={eva.dark}>
+      <ApplicationProvider {...eva} theme={{ ...eva.dark, ...theme }}>
         <ThemedSafeArea style={{ flex: 1 }}>
           <Navigation />
         </ThemedSafeArea>
