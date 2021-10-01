@@ -24,6 +24,10 @@ import {
 import { makeInvLogFn } from "../math/invLog";
 import AudioSpectrum from "../components/AudioSpectrum";
 import { useMeasure } from "../components/picker/useMeasure";
+import { useDevicesStore } from "../BluetoothManager";
+import shallow from "zustand/shallow";
+import { isDeviceSupported, sendCommandTo } from "../BluetoothDevice";
+import { Switch } from "react-native-gesture-handler";
 
 function prepareSongDisplayName({ artist, title }: Song) {
   return artist ? `${artist} - ${title}` : title;
@@ -121,6 +125,28 @@ export default function PlayerScreen() {
 
     setSound(sound);
   }
+  const [isBtMusicEnabled, setBtMusicEnabled] = React.useState(false);
+  const toggleSwitch = () =>
+    setBtMusicEnabled((previousState) => !previousState);
+  const [isConnected, device] = useDevicesStore(
+    (state) => [state.connectedDevice != null, state.connectedDevice],
+    shallow
+  );
+
+  const intervalCallback = async () => {
+    if (isBtMusicEnabled && isConnected && (await isDeviceSupported(device))) {
+      const r = bins[0].value * 2.5;
+      const g = bins[5].value * 2.5;
+      const b = bins[9].value * 2.5;
+      const str = `RGB ${Math.trunc(r)} ${Math.trunc(g)} ${Math.trunc(b)}`;
+      await sendCommandTo(device, str);
+    }
+  };
+  React.useEffect(() => {
+    const intervalId = setInterval(() => intervalCallback(), 100);
+
+    return () => clearInterval(intervalId);
+  }, [isConnected, isBtMusicEnabled]);
 
   async function startPlaying() {
     console.log("Playing Sound");
@@ -145,6 +171,16 @@ export default function PlayerScreen() {
       <Button onPress={openPicker} title="Open picker" />
       <Button title="Play Sound" onPress={startPlaying} />
       <Button title="Pause" onPress={stopPlaying} />
+      <View style={{ flexDirection: "row", justifyContent: "space-evenly" }}>
+        <Switch
+          trackColor={{ false: "#767577", true: "#71baee" }}
+          thumbColor={isBtMusicEnabled ? "#ff7700" : "#f4f3f4"}
+          ios_backgroundColor="#3e3e3e"
+          onValueChange={toggleSwitch}
+          value={isBtMusicEnabled}
+        />
+        <Text style={{ marginLeft: 10 }}>Animate RGB according to music</Text>
+      </View>
       <View style={{ flex: 1 }} onLayout={onLayout}>
         <AudioSpectrum
           height={dim.height}
