@@ -19,6 +19,10 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     padding: 16,
   },
+  containerTop: {
+    borderTopLeftRadius: BUTTON_SIZE / 2,
+    borderTopRightRadius: BUTTON_SIZE / 2,
+  },
   name: {
     fontSize: 18,
     fontWeight: "500",
@@ -59,10 +63,10 @@ export default ({ backgroundColor, h, s, v, onGestureEnd }: HeaderProps) => {
 
   return (
     <View>
-      <Animated.View style={fullySaturatedStyle}>
+      <Animated.View style={[styles.containerTop, fullySaturatedStyle]}>
         <View style={styles.container}>
           <View style={styles.side}>
-            <Animated.Text style={[styles.name]}>Living Room</Animated.Text>
+            <Animated.Text style={[styles.name]}>RGB LED Color</Animated.Text>
           </View>
         </View>
       </Animated.View>
