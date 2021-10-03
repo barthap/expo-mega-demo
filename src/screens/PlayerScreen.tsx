@@ -25,9 +25,9 @@ import {
 import { makeInvLogFn } from "../math/invLog";
 import AudioSpectrum from "../components/AudioSpectrum";
 import { useMeasure } from "../components/picker/useMeasure";
-import { useDevicesStore } from "../BluetoothManager";
+import { useDevicesStore } from "../bluetooth/BluetoothManager";
 import shallow from "zustand/shallow";
-import { isDeviceSupported, sendCommandTo } from "../BluetoothDevice";
+import { isDeviceSupported, sendCommandTo } from "../bluetooth/BluetoothDevice";
 import { Switch } from "react-native-gesture-handler";
 
 function prepareSongDisplayName({ artist, title }: Song) {
@@ -50,15 +50,16 @@ const MAX_BIN_FREQ = BIN_WIDTH * N_SAMPLES_TO_PROCESS;
 
 const calculateBins = makeOptimalQuadraticBinsForSamples(
   NUM_BINS,
-  N_SAMPLES_TO_PROCESS
+  N_SAMPLES_TO_PROCESS,
+  LOG_COEFF
 );
 
 export default function PlayerScreen() {
   const [result, setResult] = React.useState("None yet...");
   const [sound, setSound] = React.useState<Audio.Sound>();
-  const [isPaused, setPaused] = React.useState(true);
 
   // eslint-disable-next-line react-hooks/rules-of-hooks
+  // as long as the hooks are always called in the same order, it's ok
   const bins = [...new Array(NUM_BINS)].map(() => useSharedValue(1));
 
   React.useEffect(() => {
@@ -72,7 +73,7 @@ export default function PlayerScreen() {
 
   const openPicker = async () => {
     const song = await MusicPicker.openPicker({});
-    console.log(song);
+    console.log("Song:", song);
 
     if (song.canceled !== false) {
       return;
@@ -103,7 +104,7 @@ export default function PlayerScreen() {
   };
 
   const onSampleReceived = (sample: Audio.AudioSample) => {
-    // if (isPaused) return;
+    // Considerations below do not respect log scale!
     // sample rate = 44.1 kHz
     // picking 2048 samples -> 1024 usable bins
     // FFT bandwidth = sample_rate / 2 = 22.05 kHz
@@ -145,7 +146,7 @@ export default function PlayerScreen() {
     shallow
   );
 
-  const intervalCallback = async () => {
+  const updateBtLedRgb = async () => {
     if (isBtMusicEnabled && isConnected && (await isDeviceSupported(device))) {
       const r = bins[0].value * 2.5;
       const g = bins[5].value * 2.5;
@@ -155,7 +156,10 @@ export default function PlayerScreen() {
     }
   };
   React.useEffect(() => {
-    const intervalId = setInterval(() => intervalCallback(), 100);
+    // Update RGB LED every 100ms - probably can go down to 50ms, but 10 Hz is good enough
+    // BT module communicates at baud 9600 bps, average command is 17 characters long (RGB xxx yyy zzz\r\n)
+    // so in theory single transmission takes < 20ms
+    const intervalId = setInterval(() => updateBtLedRgb(), 100);
 
     return () => clearInterval(intervalId);
   }, [isConnected, isBtMusicEnabled]);

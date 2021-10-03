@@ -27,6 +27,8 @@ export const makeInvLogFn = (a: number, lastSample: number) => {
 /**
  * Generated logarythmic index remap array to be kept in memory
  * to minimalize runtime calculation overhead
+ * @param a determines how close the function is to the logarithm curve (the smaller the closer)
+ * @param size how many indices to generate, log fn has property `f(size) = size`
  */
 export function generateLogIndexArray(a: number, size: number): number[] {
   const invLog = makeLogFn(a, size);

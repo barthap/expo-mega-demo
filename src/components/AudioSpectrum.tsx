@@ -42,6 +42,7 @@ export default function AudioSpectrum({ bins, frequencyRange, height }: Props) {
 
   for (let i = 0; i < bins.length; i++) {
     // eslint-disable-next-line react-hooks/rules-of-hooks
+    // as long as the hooks are always called in the same order, it's ok
     animatedStyles[i] = useAnimatedStyle(() => {
       const rawBin = bins[i].value;
       const value = interpolate(

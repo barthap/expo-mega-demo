@@ -2,10 +2,9 @@ import React from "react";
 import { KeyboardAvoidingView, Platform, StyleSheet } from "react-native";
 import { Layout, Text, Button, Input, Icon } from "@ui-kitten/components";
 import shallow from "zustand/shallow";
-import { useDevicesStore } from "../BluetoothManager";
-import { isDeviceSupported, sendCommandTo } from "../BluetoothDevice";
+import { useDevicesStore } from "../bluetooth/BluetoothManager";
+import { isDeviceSupported, sendCommandTo } from "../bluetooth/BluetoothDevice";
 import ColorPicker from "../components/picker/ColorPicker";
-import { RGB } from "colorsys";
 
 export default function RGBControlScreen() {
   const [isConnected, device] = useDevicesStore(

@@ -105,30 +105,28 @@ export function normalizeUsingSum(bins: number[]): number[] {
  */
 export function makeOptimalQuadraticBinsForSamples(
   numBins: number,
-  sliceAt: number
+  sliceAt: number,
+  logIdxRemapCoeff: number = 20
 ) {
   const convWidth = sliceAt / numBins;
   const halfWidth = convWidth / 2;
-  const indexRemap = generateLogIndexArray(20, sliceAt);
+  const indexRemap = generateLogIndexArray(logIdxRemapCoeff, sliceAt);
 
   return (fftSamples: number[]) => {
     const results = new Array<number>(numBins).fill(0);
-    // let sum = 0;
-    for (let i = 0; i < numBins; i++) {
+    for (let binIdx = 0; binIdx < numBins; binIdx++) {
       // step = convWidth
-      const x0 = (i + 1) * convWidth;
+      const x0 = (binIdx + 1) * convWidth;
+
+      // calc discrete convolution:
+      // \sum_{k=j_{idx}}^{sliceAt}max\left[\frac{-1}{halfWidth^2}(k-x_0)^2+1;\ 0 \right ]
       for (let j = 0; j < sliceAt; j++) {
         let k = indexRemap[j];
-        results[i] +=
+        results[binIdx] +=
           fftSamples[k] *
           Math.max(0, (-1 / (halfWidth * halfWidth)) * (k - x0) * (k - x0) + 1);
       }
-
-      // sum += results[i];
     }
-    // if (sum === 0) sum = 1;
-
-    // for (let i = 0; i < numBins; i++) results[i] = (results[i] / sum) * 5;
     return results;
   };
 }

@@ -7,10 +7,10 @@ import {
   doDeviceScan,
   stopScanning,
   useDevicesStore,
-} from "../BluetoothManager";
+} from "../bluetooth/BluetoothManager";
 import { DeviceList } from "../components/DeviceList";
 import { Layout, Text, Button, Card } from "@ui-kitten/components";
-import { BT05_SERVICE_UUID_PREFIX } from "../BluetoothDevice";
+import { isDeviceSupported } from "../bluetooth/BluetoothDevice";
 
 export default function BluetoothScreen() {
   React.useEffect(() => {
@@ -40,6 +40,11 @@ export default function BluetoothScreen() {
 
   const store = useDevicesStore((state) => state);
 
+  const [isSupported, setSupported] = React.useState(false);
+  React.useEffect(() => {
+    isDeviceSupported(store.connectedDevice).then(setSupported);
+  }, [store.connectedDevice]);
+
   return (
     <Layout style={styles.container} level="2">
       <DeviceList
@@ -50,14 +55,26 @@ export default function BluetoothScreen() {
         connectedDeviceId={store.connectedDevice?.id ?? null}
       />
 
-      <Card style={styles.card} header={Header} footer={Footer}>
-        <Text>TODO: Device info here</Text>
+      <Card style={styles.card} header={CardHeader} footer={CardFooter}>
+        <Text
+          status={
+            store.connectedDevice
+              ? isSupported
+                ? "success"
+                : "warning"
+              : "info"
+          }
+        >
+          {store.connectedDevice
+            ? `This device is ${isSupported ? "" : "NOT "}supported by this app`
+            : "Connect to see more info"}
+        </Text>
       </Card>
     </Layout>
   );
 }
 
-const Header = (props) => {
+const CardHeader = (props) => {
   const dev = useDevicesStore((state) => state.connectedDevice);
   return (
     <View {...props}>
@@ -67,7 +84,7 @@ const Header = (props) => {
   );
 };
 
-const Footer = (props) => {
+const CardFooter = (props) => {
   const dev = useDevicesStore((state) => state.connectedDevice);
   return (
     <View {...props} style={[props.style, styles.footerContainer]}>
