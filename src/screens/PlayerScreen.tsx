@@ -1,7 +1,7 @@
 import { StatusBar } from "expo-status-bar";
 import React from "react";
 import { Button, Dimensions, StyleSheet, View } from "react-native";
-import { Layout, Text } from "@ui-kitten/components";
+import { Layout, Text, Toggle } from "@ui-kitten/components";
 
 import MusicPicker, {
   Song,
@@ -82,6 +82,7 @@ export default function PlayerScreen() {
   // as long as the hooks are always called in the same order, it's ok
   const bins = [...new Array(NUM_BINS)].map(() => useSharedValue(1));
 
+  // Song unloading
   React.useEffect(() => {
     return sound
       ? () => {
@@ -179,6 +180,8 @@ export default function PlayerScreen() {
       await sendCommandTo(device, str);
     }
   };
+
+  // Updating LED
   React.useEffect(() => {
     // Update RGB LED every 100ms - probably can go down to 50ms, but 10 Hz is good enough
     // BT module communicates at baud 9600 bps, average command is 17 characters long (RGB xxx yyy zzz\r\n)
@@ -220,10 +223,6 @@ export default function PlayerScreen() {
 
   return (
     <Layout style={styles.container} level="2">
-      {/* <Text>Result: {result}</Text>
-      <Button onPress={openPicker} title="Open picker" />
-      <Button title="Play Sound" onPress={startPlaying} />
-      <Button title="Pause" onPress={stopPlaying} /> */}
       <PlayerControls
         {...(initialState as any)}
         {...status}
@@ -237,16 +236,13 @@ export default function PlayerScreen() {
         setVolume={_setVolumeAsync}
         pickSong={openPicker}
       />
-      <View style={{ flexDirection: "row", justifyContent: "space-evenly" }}>
-        <Switch
-          trackColor={{ false: "#767577", true: "#71baee" }}
-          thumbColor={isBtMusicEnabled ? "#ff7700" : "#f4f3f4"}
-          ios_backgroundColor="#3e3e3e"
-          onValueChange={toggleSwitch}
-          value={isBtMusicEnabled}
-        />
-        <Text style={{ marginLeft: 10 }}>Animate RGB according to music</Text>
-      </View>
+      <Toggle
+        checked={isBtMusicEnabled}
+        onChange={toggleSwitch}
+        style={{ justifyContent: "flex-start", marginLeft: 5, marginBottom: 5 }}
+      >
+        Animate RGB according to music
+      </Toggle>
       <View style={{ flex: 1 }} onLayout={onLayout}>
         <AudioSpectrum
           height={dim.height}
@@ -261,7 +257,5 @@ export default function PlayerScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    // alignItems: "center",
-    // justifyContent: "center",
   },
 });

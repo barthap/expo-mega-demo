@@ -390,14 +390,14 @@ const StyledComponent = withStyles(Player, (theme) => ({
   buttonsContainer: {
     justifyContent: "space-evenly",
     alignItems: "stretch",
-    minHeight: 80,
+    minHeight: 70,
   },
   button: {
     // flex: 1,
     marginHorizontal: 5,
     paddingBottom: 6,
     borderRadius: 6,
-    marginBottom: 10,
+    marginBottom: 5,
     alignItems: "center",
     justifyContent: "flex-start",
   },
