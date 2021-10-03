@@ -1,18 +1,16 @@
-import { StatusBar } from "expo-status-bar";
 import React from "react";
-import { Button, Dimensions, StyleSheet, View } from "react-native";
-import { Layout, Text, Toggle } from "@ui-kitten/components";
+import { StyleSheet, View } from "react-native";
+import { Layout, Toggle } from "@ui-kitten/components";
 
 import MusicPicker, {
   Song,
 } from "../../custom_native_modules/expo-music-picker/src/MusicPicker";
 import {
   Audio,
-  AVMetadata,
   AVPlaybackStatus,
   AVPlaybackStatusToSet,
 } from "../../custom_native_modules/expo-av-jsi/src";
-import Reanimated, {
+import {
   cancelAnimation,
   Extrapolate,
   interpolate,
@@ -33,7 +31,6 @@ import { useMeasure } from "../components/picker/useMeasure";
 import { useDevicesStore } from "../bluetooth/BluetoothManager";
 import shallow from "zustand/shallow";
 import { isDeviceSupported, sendCommandTo } from "../bluetooth/BluetoothDevice";
-import { Switch } from "react-native-gesture-handler";
 import PlayerControls from "../components/PlayerControls";
 
 function prepareSongDisplayName({ artist, title }: Song) {
@@ -72,6 +69,10 @@ const initialState: AVPlaybackStatusToSet & {
   durationMillis: 0,
   volume: 1,
 };
+
+Audio.setAudioModeAsync({
+  playsInSilentModeIOS: true,
+});
 
 export default function PlayerScreen() {
   const [status, setStatus] = React.useState<AVPlaybackStatus>();
