@@ -8,11 +8,12 @@ import MusicPicker, {
 } from "../../custom_native_modules/expo-music-picker/src/MusicPicker";
 import { Audio } from "../../custom_native_modules/expo-av-jsi/src";
 import Reanimated, {
+  cancelAnimation,
   Extrapolate,
   interpolate,
-  useAnimatedStyle,
+  runOnUI,
   useSharedValue,
-  withSpring,
+  withTiming,
 } from "react-native-reanimated";
 import { cfft } from "../math/fft";
 import {
@@ -47,9 +48,15 @@ const invLog = makeInvLogFn(LOG_COEFF, N_SAMPLES_TO_PROCESS);
 const FIRST_BIN_FREQ = ithBinToFreq(BIN_WIDTH)(invLog(20));
 const MAX_BIN_FREQ = BIN_WIDTH * N_SAMPLES_TO_PROCESS;
 
+const calculateBins = makeOptimalQuadraticBinsForSamples(
+  NUM_BINS,
+  N_SAMPLES_TO_PROCESS
+);
+
 export default function PlayerScreen() {
   const [result, setResult] = React.useState("None yet...");
   const [sound, setSound] = React.useState<Audio.Sound>();
+  const [isPaused, setPaused] = React.useState(true);
 
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const bins = [...new Array(NUM_BINS)].map(() => useSharedValue(1));
@@ -67,12 +74,55 @@ export default function PlayerScreen() {
     const song = await MusicPicker.openPicker({});
     console.log(song);
 
-    if (song.canceled != false) {
+    if (song.canceled !== false) {
       return;
     }
 
     loadSound(song.uri);
     setResult(prepareSongDisplayName(song));
+  };
+
+  const updateBinHeights = (values: number[]) => {
+    "worklet";
+    for (let i = 0; i < NUM_BINS; i++) {
+      bins[i].value = interpolate(
+        values[i],
+        [0, 90, 200, 900],
+        [1, 60, 90, 100],
+        Extrapolate.CLAMP
+      );
+    }
+  };
+
+  const fadeBinsDown = () => {
+    "worklet";
+    for (let i = 0; i < NUM_BINS; i++) {
+      cancelAnimation(bins[i]);
+      bins[i].value = withTiming(1, { duration: 500 });
+    }
+  };
+
+  const onSampleReceived = (sample: Audio.AudioSample) => {
+    // if (isPaused) return;
+    // sample rate = 44.1 kHz
+    // picking 2048 samples -> 1024 usable bins
+    // FFT bandwidth = sample_rate / 2 = 22.05 kHz
+    // Bin width = bandwidth / 1024 bins = ~21 Hz - and that is our resolution
+    // ----
+    // we divide it into 8 bins (bandwidth / (1024/8) --> 21 Hz * 8 = 168 Hz Bin width)
+    // mih freq = 168/2 = 84Hz
+    // ---
+    // but let's take 512 of these bins (bandwidth = 11 kHz)
+    // then single original bin width = 21Hz (still)
+    // we just ignore the higher part
+    const freqs = cfft(sample.channels[0].frames.slice(0, FFT_SIZE)).map((n) =>
+      n.mag()
+    );
+
+    if (freqs.some(isNaN)) return;
+    const binValues = calculateBins(freqs);
+
+    runOnUI(updateBinHeights)(binValues);
   };
 
   async function loadSound(uri: string) {
@@ -84,44 +134,6 @@ export default function PlayerScreen() {
     const { sound } = await Audio.Sound.createAsync({
       uri,
     });
-    const calculateBins = makeOptimalQuadraticBinsForSamples(
-      NUM_BINS,
-      N_SAMPLES_TO_PROCESS
-    );
-    sound.onAudioSampleReceived = (sample) => {
-      // sample rate = 44.1 kHz
-      // picking 2048 samples -> 1024 usable bins
-      // FFT bandwidth = sample_rate / 2 = 22.05 kHz
-      // Bin width = bandwidth / 1024 bins = ~21 Hz - and that is our resolution
-      // ----
-      // we divide it into 8 bins (bandwidth / (1024/8) --> 21 Hz * 8 = 168 Hz Bin width)
-      // mih freq = 168/2 = 84Hz
-      // ---
-      // but let's take 512 of these bins (bandwidth = 11 kHz)
-      // then single original bin width = 21Hz (still)
-      // we just ignore the higher part
-      const freqs = cfft(sample.channels[0].frames.slice(0, FFT_SIZE)).map(
-        (n) => n.mag()
-      );
-
-      if (freqs.some(isNaN)) return;
-      const binValues = calculateBins(freqs);
-
-      for (let i = 0; i < NUM_BINS; i++) {
-        let inRange = [0, 4];
-        if (i === 0) inRange = [0, 25];
-
-        // this cannot be put directly iside interpolate()
-        // we must extract outside
-        const fbin = binValues[i];
-        bins[i].value = interpolate(
-          fbin,
-          [0, 90, 200],
-          [1, 60, 100],
-          Extrapolate.CLAMP
-        );
-      }
-    };
 
     setSound(sound);
   }
@@ -150,17 +162,20 @@ export default function PlayerScreen() {
 
   async function startPlaying() {
     console.log("Playing Sound");
+    sound.onAudioSampleReceived = onSampleReceived;
     await sound.playAsync();
   }
 
   async function stopPlaying() {
     await sound?.pauseAsync();
 
-    setTimeout(() => {
-      for (let i = 0; i < NUM_BINS; i++) {
-        bins[i].value = 1;
-      }
-    }, 500);
+    // even after awaiting pauseAsync(), the sample callback
+    // is still called a few times, which broke the "fade down" animation
+    // - so it is removed here to prevent this.
+    sound.onAudioSampleReceived = undefined;
+    console.log("Paused");
+
+    runOnUI(fadeBinsDown)();
   }
 
   const [dim, onLayout] = useMeasure();
