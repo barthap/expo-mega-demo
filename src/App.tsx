@@ -12,6 +12,16 @@ import { StatusBar } from "expo-status-bar";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { default as theme } from "../assets/custom-theme.json";
 
+// SplashScreen on dev-client has some issues
+// disable logs for now
+// TODO: investigate this later
+import "expo-splash-screen";
+import { LogBox } from "react-native";
+LogBox.ignoreLogs([
+  /\'SplashScreen.show\' has already been called for given view controller/,
+  /No native splash screen registered for given view controller/,
+]);
+
 function ThemedSafeArea(props) {
   const theme = useTheme();
   return (
