@@ -6,7 +6,12 @@ import { Layout, Text } from "@ui-kitten/components";
 import MusicPicker, {
   Song,
 } from "../../custom_native_modules/expo-music-picker/src/MusicPicker";
-import { Audio } from "../../custom_native_modules/expo-av-jsi/src";
+import {
+  Audio,
+  AVMetadata,
+  AVPlaybackStatus,
+  AVPlaybackStatusToSet,
+} from "../../custom_native_modules/expo-av-jsi/src";
 import Reanimated, {
   cancelAnimation,
   Extrapolate,
@@ -29,6 +34,7 @@ import { useDevicesStore } from "../bluetooth/BluetoothManager";
 import shallow from "zustand/shallow";
 import { isDeviceSupported, sendCommandTo } from "../bluetooth/BluetoothDevice";
 import { Switch } from "react-native-gesture-handler";
+import PlayerControls from "../components/PlayerControls";
 
 function prepareSongDisplayName({ artist, title }: Song) {
   return artist ? `${artist} - ${title}` : title;
@@ -54,9 +60,23 @@ const calculateBins = makeOptimalQuadraticBinsForSamples(
   LOG_COEFF
 );
 
+const initialState: AVPlaybackStatusToSet & {
+  isPlaying: boolean;
+  durationMillis: number;
+} = {
+  isMuted: false,
+  isLooping: false,
+  isPlaying: false,
+  shouldPlay: false,
+  positionMillis: 0,
+  durationMillis: 0,
+  volume: 1,
+};
+
 export default function PlayerScreen() {
-  const [result, setResult] = React.useState("None yet...");
+  const [status, setStatus] = React.useState<AVPlaybackStatus>();
   const [sound, setSound] = React.useState<Audio.Sound>();
+  const [title, setTitle] = React.useState("Pick a song first");
 
   // eslint-disable-next-line react-hooks/rules-of-hooks
   // as long as the hooks are always called in the same order, it's ok
@@ -67,6 +87,7 @@ export default function PlayerScreen() {
       ? () => {
           console.log("Unloading Sound");
           sound.unloadAsync();
+          runOnUI(fadeBinsDown)();
         }
       : undefined;
   }, [sound]);
@@ -80,7 +101,7 @@ export default function PlayerScreen() {
     }
 
     loadSound(song.uri);
-    setResult(prepareSongDisplayName(song));
+    setTitle(prepareSongDisplayName(song));
   };
 
   const updateBinHeights = (values: number[]) => {
@@ -132,9 +153,12 @@ export default function PlayerScreen() {
     console.log("Display bin width", DISPLAY_BIN_WIDTH);
     console.log("Max bin freq", MAX_BIN_FREQ);
 
-    const { sound } = await Audio.Sound.createAsync({
-      uri,
-    });
+    const { sound, status: newStatus } = await Audio.Sound.createAsync(
+      { uri },
+      { progressUpdateIntervalMillis: 150 }
+    );
+    setStatus(newStatus);
+    sound.setOnPlaybackStatusUpdate(setStatus);
 
     setSound(sound);
   }
@@ -184,12 +208,35 @@ export default function PlayerScreen() {
 
   const [dim, onLayout] = useMeasure();
 
+  const _replayAsync = async () => sound?.replayAsync();
+  const _setPositionAsync = async (position: number) =>
+    sound?.setPositionAsync(position);
+  const _setIsLoopingAsync = async (isLooping: boolean) =>
+    sound?.setIsLoopingAsync(isLooping);
+  const _setIsMutedAsync = async (isMuted: boolean) =>
+    sound?.setIsMutedAsync(isMuted);
+  const _setVolumeAsync = async (volume: number) =>
+    sound?.setVolumeAsync(volume);
+
   return (
     <Layout style={styles.container} level="2">
-      <Text>Result: {result}</Text>
+      {/* <Text>Result: {result}</Text>
       <Button onPress={openPicker} title="Open picker" />
       <Button title="Play Sound" onPress={startPlaying} />
-      <Button title="Pause" onPress={stopPlaying} />
+      <Button title="Pause" onPress={stopPlaying} /> */}
+      <PlayerControls
+        {...(initialState as any)}
+        {...status}
+        metadata={{ title }}
+        playAsync={startPlaying}
+        pauseAsync={stopPlaying}
+        replayAsync={_replayAsync}
+        setPositionAsync={_setPositionAsync}
+        setIsLoopingAsync={_setIsLoopingAsync}
+        setIsMutedAsync={_setIsMutedAsync}
+        setVolume={_setVolumeAsync}
+        pickSong={openPicker}
+      />
       <View style={{ flexDirection: "row", justifyContent: "space-evenly" }}>
         <Switch
           trackColor={{ false: "#767577", true: "#71baee" }}
@@ -214,7 +261,7 @@ export default function PlayerScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
+    // alignItems: "center",
+    // justifyContent: "center",
   },
 });
