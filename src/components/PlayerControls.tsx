@@ -202,7 +202,14 @@ function Player(props: Props) {
         {_renderReplayButton()}
       </View>
 
-      <Text>{props.metadata?.title ?? ""}</Text>
+      <Text
+        category="c2"
+        numberOfLines={1}
+        style={{ paddingHorizontal: 8 }}
+        appearance={props.metadata?.title ? "default" : "hint"}
+      >
+        {props.metadata?.title || "No song selected"}
+      </Text>
 
       <View style={styles.container}>
         <VolumeSlider

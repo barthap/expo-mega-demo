@@ -77,7 +77,7 @@ Audio.setAudioModeAsync({
 export default function PlayerScreen() {
   const [status, setStatus] = React.useState<AVPlaybackStatus>();
   const [sound, setSound] = React.useState<Audio.Sound>();
-  const [title, setTitle] = React.useState("Pick a song first");
+  const [title, setTitle] = React.useState<string | null>(null);
 
   // eslint-disable-next-line react-hooks/rules-of-hooks
   // as long as the hooks are always called in the same order, it's ok
@@ -88,6 +88,7 @@ export default function PlayerScreen() {
     return sound
       ? () => {
           console.log("Unloading Sound");
+          setTitle(null);
           sound.unloadAsync();
           runOnUI(fadeBinsDown)();
         }
