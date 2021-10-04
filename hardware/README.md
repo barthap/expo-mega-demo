@@ -5,7 +5,7 @@ Originally, the RGB controller was implemented using AVR Xmega microcontroller. 
 ## Circuit
 
 - Arduino Uno R3 board was used as a controller.
-- RGB is a common-anode 10mm LED, connected directly to Arduino PWM pins. Here, 1k resistors are used to limit the LED current.
+- RGB is a common-anode 10mm LED, connected directly to Arduino PWM pins. Here, 820 Ohm resistors are used to limit the LED current. If you need higher power LED or e.g. 12V LED strips, you need to use MOSFET transistors.
 - Bluetooth is a cheap `HM-10 / MLT-BT05` BT 4.0 module. Communicates over 3.3V, but needs 5V supply. (when powered with 3.3V, it enters the AT mode). [A comprehensive guide to this module can be found here](http://www.martyncurrey.com/hm-10-bluetooth-4ble-modules/). The module has one custom BLE service (`0xFFE0`) with one characteristics (`0xFFE1`) for serial communication.
 - A resistor voltage divider is used on the `Arduino TX -> Bluetooth RX` line to lower the input voltage from 5V to around 3.3V. Resistor ratio is 2k/1k.
 

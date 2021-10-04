@@ -4,14 +4,58 @@ Experimenting with new awesome React Native + Expo features.
 
 **Work in progress**. More info soon.
 
+A preview wideo (click the image):
+[![Watch the video](https://img.youtube.com/vi/GIyyjOoqZ5Y/maxresdefault.jpg)](https://youtu.be/GIyyjOoqZ5Y)
+
+### Core features:
+
+- Uses [Expo custom managed workflow](https://docs.expo.dev/workflow/customizing/). Prebuilds on Expo SDK 43 alpha template.
+- All native changes (even these unusual) and patches are covered with config plugins and yarn `postinstall` script.
+- Uses [Expo Dev Client](https://docs.expo.dev/clients/introduction/), react-navigation, ui-kitten
+- Bluetooth communication using [react-native-ble-plx](https://github.com/dotintent/react-native-ble-plx) with [config plugin](https://github.com/expo/config-plugins/tree/master/packages/react-native-ble-plx)
+- Color picker using Expo GL, made from [this tutorial from William Candillon](https://www.youtube.com/watch?v=bAZhVl9YvB4), but rewritten to [Reanimated v2](https://github.com/software-mansion/react-native-reanimated)
+- Music Picker is an expo-module written using Swift "Sweet" API. More info soon.
+- JSI real-time Audio streaming, taken from [this PR](https://github.com/expo/expo/pull/13516), thank you Marc!
+- Player controls stolen from NCL (internal Expo rn-tester equivalent).
+- FFT is calculated in the JS thread. The spectrum bin heights are written to `SharedValue`s and animated with Reanimated 2.
+  > There is plan to use [react-native-multithreading](https://github.com/mrousavy/react-native-multithreading) and calculate it in a separate thread. But even without that, the JS keeps around 57-59 fps.
+- Hardware: Arduino Uno and the HM-10 BLE 4.0 module. Read more in the [Hardware README](./hardware/README.md).
+
+## How to run
+
+First time:
+
+1. Make sure you have Expo and all the stuff installed and configured (including Xcode)
+1. `yarn install`
+1. `yarn prebuild`
+1. Copy `AppDelegate.m` from `patches` dir to `ios/expomegademo` directory - see below why.
+1. `yarn run:ios`
+
+Just to start the bundler (without rebuilding client): run `yarn start`.
+
 ## Known issues
 
-- `expo-dev-client` config plugin is not yet working with SDK 43.
-  - It hangs the CLI for Android at the `dangerousMod -> Main Activity`
+Most of them are caused by using very early SDK 43 stuff, which is not yet published, and other published versions are not yet compatible.
+
+- `expo-dev-client` config plugin is not yet working with SDK 43 alpha.
+  - It hangs the CLI for Android at the `dangerousMod -> Main Activity` so the `-p ios` must be added to the prebuild command.
   - It messes up the `AppDelegate.m`. Workign version can be found in `./patches/AppDelegate.m` - need to be copied manually.
-- Frequency bin labels are wrong 🤷. I am too lazy to think about how to calculate and it.
-- Modifying the `sound.onAudioSampleReceived` callback (and sometimes the Reanimated 2 stuff too) requires at least picking the song again to reload properly, sometimes whole app restart is needed.
+- Frequency bin labels are wrong 🤷. I needed to display them in log scale and I am too lazy to think about how to recalculate everything properly.
+- Modifying the `sound.onAudioSampleReceived` callback and the Reanimated 2 stuff requires at least picking the song again to reload properly, sometimes whole app restart is needed.
 - Does not work on emulator.
 - Not yet works for Android
   - No JSI-related `expo-av` changes applied.
   - The MusicPicker module isn't written on that platform (there's copy-pasted `expo-haptics` code ¯\_(ツ)\_/¯)
+
+### Applied patches
+
+See the [`postinstall.js`](./postinstall.js) script and the `plugins` section of [`app.json`](./app.json) to see how the patches are applied
+
+- patch-package for `expo-gl` and related libraries - needed, because of migration from `@unimodules/core` to `expo-modules-core`
+- new `expo-modules-autolinking` requires modules to be specified in `package.json` dependencies. I don't want to copy my custom native modules to `node_modules` they are deleted after being copied there by yarn.
+- by default, expo modules are built with `xcframework` if available, but that does not work for patched `expo-gl`, so its `xcframework` is deleted force build from source.
+- `expo-gl` installs wrong `expo-modules-core` dependency in its own `node_modules` - it is deleted, the global `node_modules` one is correct.
+- `expo-cli` built-in plugins sets the `Push Notifications` capability even when `expo-notifications` are not installed and I see no way to disable it. Another plugin was written to delete that entitlement.
+- iOS requires another `Info.plist` value about `Media Library usage permission` - a config plugin takes care of that
+- The [`custom_native_modules`](./custom_native_modules) directory needs to be added to autolinking paths in `Podfile`. A config plugin takes care of that.
+- The `AppDelegate.m` is being broken by `expo-dev-client` config plugin, ~~wrote another config plugin to copy the patched file~~ - it does not work, still need to copy it manually.

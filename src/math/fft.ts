@@ -1,3 +1,6 @@
+// This file code is copied from here: https://rosettacode.org/wiki/Fast_Fourier_transform#JavaScript
+// and partially converted to TypeScript
+
 export class Complex {
   re: number;
   im: number;
