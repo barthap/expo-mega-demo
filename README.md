@@ -4,8 +4,9 @@ Experimenting with new awesome React Native + Expo features.
 
 **Work in progress**. More info soon.
 
-A preview wideo (click the image):
-[![Watch the video](https://img.youtube.com/vi/GIyyjOoqZ5Y/maxresdefault.jpg)](https://youtu.be/GIyyjOoqZ5Y)
+A preview video (**click the image**):
+[![Watch the video](https://user-images.githubusercontent.com/278340/135893709-e7549883-8d16-4446-8f1d-ef0e4bae024c.jpg)](https://youtu.be/GIyyjOoqZ5Y)
+
 
 ### Core features:
 
