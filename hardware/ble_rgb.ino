@@ -41,38 +41,43 @@ void setRGB(uint8_t r, uint8_t g, uint8_t b) {
   target_b = b;
 }
 
-void myISR() {
-  if (target_r > current_r) current_r++;
+// Called every 1ms - it takes ~0.25s to fade from black to white
+void updateFades() {
+  if      (target_r > current_r) current_r++;
   else if (target_r < current_r) current_r--;
 
-    if (target_g > current_g) current_g++;
+  if      (target_g > current_g) current_g++;
   else if (target_g < current_g) current_g--;
 
-    if (target_b > current_b) current_b++;
+  if      (target_b > current_b) current_b++;
   else if (target_b < current_b) current_b--;
 
-    analogWrite(r_pin, 255-current_r);
+  analogWrite(r_pin, 255-current_r);
   analogWrite(g_pin, 255-current_g);
   analogWrite(b_pin, 255-current_b);
 }
 
+// called when received "RGB xxx yyy zzz" command
 void cmdLedRgbFn(SerialCommands* sender)
 {
   char* led_str = sender->Next();
   if (led_str == NULL) {
     Serial.println("Invalid LED RGB command");
+    return;
   }
   uint8_t r = atoi(led_str);
 
   led_str = sender->Next();
   if (led_str == NULL) {
     Serial.println("Invalid LED RGB command");
+    return;
   }
   uint8_t g = atoi(led_str);
 
   led_str = sender->Next();
   if (led_str == NULL) {
     Serial.println("Invalid LED RGB command");
+    return;
   }
   uint8_t b = atoi(led_str);
 
@@ -89,22 +94,19 @@ SerialCommand cmdRgbLed("RGB", cmdLedRgbFn);
 
 void setup()
 {
-  // Open serial communications and wait for port to open:
   Serial.begin(115200);
-  while (!Serial) {
-    ; // wait for serial port to connect. Needed for Native USB only
-  }
-
+  while (!Serial);
 
   Serial.println("Hello World!");
 
-  // set the data rate for the SoftwareSerial port
+  // the HM-10 module by default uses 9600 baud
   bleSerial.begin(9600);
   while (!bleSerial);
 
   serialCommands.SetDefaultHandler(cmdUnrecognized);
   serialCommands.AddCommand(&cmdRgbLed);
 
+  // simple start-up animation
   writeRGB(255,0,0);
   delay(500);
   writeRGB(0,255,0);
@@ -113,15 +115,16 @@ void setup()
   delay(500);
   writeRGB(255,255,255);
 
-  Timer1.initialize(1000);
-  Timer1.attachInterrupt(myISR);
+  // Run every 1000 microseconds = 1kHz
+  Timer1.initialize(1000); 
+  Timer1.attachInterrupt(updateFades);
 }
 
-void loop() // run over and over
+void loop()
 {
   serialCommands.ReadSerial();
-//  if (bleSerial.available())
-//    Serial.write(bleSerial.read());
+
+  // passthrough PC --> Bluetooth serial data
   if (Serial.available())
     bleSerial.write(Serial.read());
 }
