@@ -10,7 +10,9 @@ A preview video (**click the image**):
 
 ### Core features:
 
-- Uses [Expo custom managed workflow](https://docs.expo.dev/workflow/customizing/). Prebuilds on Expo SDK 43 alpha template.
+> **⚠️ Caution!** Many features used in this demo are in early, experimental stage and they're not ready for production. Use on your own risk.
+
+- Uses [Expo custom managed workflow](https://docs.expo.dev/workflow/customizing/). Prebuilds on Expo SDK 43 pre-alpha template.
 - All native changes (even these unusual) and patches are covered with config plugins and yarn `postinstall` script.
 - Uses [Expo Dev Client](https://docs.expo.dev/clients/introduction/), react-navigation, ui-kitten
 - Bluetooth communication using [react-native-ble-plx](https://github.com/dotintent/react-native-ble-plx) with [config plugin](https://github.com/expo/config-plugins/tree/master/packages/react-native-ble-plx)
@@ -36,7 +38,7 @@ Just to start the bundler (without rebuilding client): run `yarn start`.
 
 ## Known issues
 
-Most of them are caused by using very early SDK 43 stuff, which is not yet published, and other published versions are not yet compatible.
+Most of them are caused by using very early SDK 43 stuff, which is not yet published, and other published packages are not yet compatible.
 
 - `expo-dev-client` config plugin is not yet working with SDK 43 alpha.
   - It hangs the CLI for Android at the `dangerousMod -> Main Activity` so the `-p ios` must be added to the prebuild command.
