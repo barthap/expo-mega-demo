@@ -48,7 +48,7 @@ Most of them are caused by using very early SDK 43 stuff, which is not yet publi
 - Does not work on emulator.
 - Not yet works for Android
   - No JSI-related `expo-av` changes applied.
-  - The MusicPicker module isn't written on that platform (there's copy-pasted `expo-haptics` code ¯\_(ツ)\_/¯)
+  - The MusicPicker module isn't implemented yet for that platform (there's a copy-pasted `expo-haptics` code ¯\_(ツ)\_/¯)
 
 ### Applied patches
 
