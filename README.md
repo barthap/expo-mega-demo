@@ -43,7 +43,7 @@ Most of them are caused by using very early SDK 43 stuff, which is not yet publi
 - `expo-dev-client` config plugin is not yet working with SDK 43 alpha.
   - It hangs the CLI for Android at the `dangerousMod -> Main Activity` so the `-p ios` must be added to the prebuild command.
   - It messes up the `AppDelegate.m`. Workign version can be found in `./patches/AppDelegate.m` - need to be copied manually.
-- Frequency bin labels are wrong 🤷. I needed to display them in log scale and I am too lazy to think about how to recalculate everything properly.
+- Frequency bin labels are wrong 🤷. Eventually I needed to display them in log scale and I am too lazy to think about how to recalculate everything properly.
 - Modifying the `sound.onAudioSampleReceived` callback and the Reanimated 2 stuff requires at least picking the song again to reload properly, sometimes whole app restart is needed.
 - Does not work on emulator.
 - Not yet works for Android
