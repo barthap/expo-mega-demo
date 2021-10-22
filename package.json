@@ -5,9 +5,8 @@
   "version": "0.1.0",
   "scripts": {
     "postinstall": "patch-package && node postinstall.js",
-    "android": "react-native run-android",
-    "ios": "react-native run-ios",
-    "web": "expo start --web",
+    "android": "echo \"Android is not supported yet!\" && exit 1",
+    "ios": "yarn run run:ios",
     "start": "expo start --dev-client",
     "prebuild": "expo prebuild -p ios",
     "prebuild:clean": "yarn run prebuild --clean",
