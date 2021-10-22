@@ -29,6 +29,7 @@
     "plugins": [
       "@config-plugins/react-native-ble-plx",
       "./patches/fix-entitlements.plugin",
+      "./patches/fix-bluetooth.plugin",
       "expo-dev-client",
       "./custom_native_modules/expo-music-picker/app.plugin",
       "./custom_native_modules/link-custom-modules.plugin"
