@@ -2,7 +2,7 @@
   "expo": {
     "name": "Expo Mega Demo",
     "slug": "expo-mega-demo",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "scheme": "demo",
@@ -14,6 +14,7 @@
     "updates": {
       "fallbackToCacheTimeout": 0
     },
+    "jsEngine": "jsc",
     "ios": {
       "bundleIdentifier": "com.barthap.expomegademo",
       "supportsTablet": false
@@ -29,6 +30,7 @@
     "plugins": [
       "@config-plugins/react-native-ble-plx",
       "./patches/fix-entitlements.plugin",
+      "./patches/fix-bluetooth.plugin",
       "expo-dev-client",
       "./custom_native_modules/expo-music-picker/app.plugin",
       "./custom_native_modules/link-custom-modules.plugin"
