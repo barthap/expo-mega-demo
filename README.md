@@ -38,13 +38,14 @@ Just to start the bundler (without rebuilding client): run `yarn start`.
 
 Most of them are caused by limited time of mine, and also by some libraries, which depend on Expo, but have not yet been updated to support recently-released Expo SDK 43.
 
-- iOS JSI Audio is not working on Hermes yet. I'm working on it.
+- ~~iOS JSI Audio is not working on Hermes yet. I'm working on it.~~ Should be working now, lmk if it's not.
 - Frequency bin labels are wrong 🤷. Eventually I needed to display them in log scale and I am too lazy to think about how to recalculate everything properly.
 - Modifying the `sound.onAudioSampleReceived` callback and the Reanimated 2 stuff requires at least picking the song again to reload properly, sometimes whole app restart is needed.
-- May not work on emulator.
+- May not work on emulator. _The JSI Audio should work, but as far as I remember, the music picker does not open. And, of course, Bluetooth cannot work on simulator._
 - Not yet works for Android
+  - Waiting for Expo Modules architecture to support Kotlin DSL.
+  - The MusicPicker module isn't implemented yet for that platform for the above reason (instead there's a copy-pasted `expo-haptics` code ¯\_(ツ)\_/¯)
   - No JSI-related `expo-av` changes applied.
-  - The MusicPicker module isn't implemented yet for that platform (there's a copy-pasted `expo-haptics` code ¯\_(ツ)\_/¯)
 
 ### Applied patches
 
