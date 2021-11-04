@@ -1,15 +1,16 @@
 // Copyright 2017-present 650 Industries. All rights reserved.
-#pragma once
 
 #import <AVFoundation/AVFoundation.h>
 
 #import <EXAV/EXAV.h>
+#import <EXAV/EXAudioSampleCallback.h>
 
 @interface EXAVPlayerData : NSObject <EXAVObject>
 
 @property (nonatomic, strong) AVQueuePlayer *player;
 @property (nonatomic, strong) NSURL *url;
 @property (nonatomic, strong) NSDictionary *headers;
+@property (nonatomic, strong) EXAudioSampleCallback *sampleBufferCallback;
 @property (nonatomic, strong) void (^statusUpdateCallback)(NSDictionary *);
 @property (nonatomic, strong) void (^metadataUpdateCallback)(NSDictionary *);
 @property (nonatomic, strong) void (^errorCallback)(NSString *);
@@ -30,10 +31,5 @@
 - (void)replayWithStatus:(NSDictionary *)status
                 resolver:(EXPromiseResolveBlock)resolve
                 rejecter:(EXPromiseRejectBlock)reject;
-
-typedef void (^SampleBufferCallback)(AudioBuffer *buffer, double timestamp);
-
-- (void)addSampleBufferCallback:(SampleBufferCallback)callback;
-- (void)removeSampleBufferCallback;
 
 @end
