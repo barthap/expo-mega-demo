@@ -83,19 +83,22 @@ export default function PlayerScreen() {
   // as long as the hooks are always called in the same order, it's ok
   const bins = [...new Array(NUM_BINS)].map(() => useSharedValue(1));
 
-  // Song unloading
-  React.useEffect(() => {
+  const unloadSound = () => {
     if (sound) {
-      return () => {
-        console.log("Unloading Sound");
-        setTitle(null);
-        sound.unloadAsync();
-        runOnUI(fadeBinsDown)();
-      };
-    } else {
-      return undefined;
+      console.log("Unloading Sound");
+      sound.onAudioSampleReceived = undefined;
+      sound.unloadAsync();
+      setTitle(null);
+      runOnUI(fadeBinsDown)();
     }
-  }, [sound]);
+  };
+
+  // Song unloading when screen is deleted
+  React.useEffect(() => {
+    return () => {
+      unloadSound();
+    };
+  }, []);
 
   const openPicker = async () => {
     const song = await MusicPicker.openPicker({});
@@ -154,6 +157,7 @@ export default function PlayerScreen() {
   };
 
   async function loadSound(uri: string) {
+    unloadSound(); // unload previous song, if exists
     console.log("Loading Sound");
     console.log("Bin width", BIN_WIDTH);
     console.log("Display bin width", DISPLAY_BIN_WIDTH);
