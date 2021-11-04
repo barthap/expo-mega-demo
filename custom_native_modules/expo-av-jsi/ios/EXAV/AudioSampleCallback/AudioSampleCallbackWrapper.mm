@@ -29,8 +29,9 @@ void AudioSampleCallbackWrapper::call(AudioBuffer* buffer, double timestamp)
   }
 
   // We need to invoke the callback from the JS thread, otherwise Hermes complains
-  strongWrapper->jsInvoker().invokeAsync([this, timestamp, buffer] {
-    auto jsiCallbackWrapper = this->weakWrapper.lock();
+  auto weakWrapper = this->weakWrapper;
+  strongWrapper->jsInvoker().invokeAsync([weakWrapper, timestamp, buffer] {
+    auto jsiCallbackWrapper = weakWrapper.lock();
     if (!jsiCallbackWrapper) {
       return;
     }
