@@ -73,26 +73,9 @@ export default function AudioSpectrum({ bins, frequencyRange, height }: Props) {
         ))}
       </Layout>
       <Layout level="3" style={styles.xAxisLabels}>
-        <Text>
-          {lowFreq.toLocaleString(undefined, {
-            maximumFractionDigits: 0,
-          })}{" "}
-          Hz
-        </Text>
-        <Text>
-          {midFreq.toLocaleString(undefined, {
-            maximumFractionDigits: 0,
-          })}{" "}
-          Hz
-        </Text>
-        <Text>
-          {(highFreq / 1000)
-            .toLocaleString(undefined, {
-              maximumFractionDigits: 1,
-            })
-            .replace(",", ".")}{" "}
-          kHz
-        </Text>
+        <Text>{formatHertzString(lowFreq, { digits: 0 })} Hz</Text>
+        <Text>{formatHertzString(midFreq, { digits: 0 })} Hz</Text>
+        <Text>{formatHertzString(highFreq / 1000, { digits: 1 })} kHz</Text>
       </Layout>
     </>
   );
@@ -119,3 +102,18 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
 });
+
+// `toLocaleString()` does not work in Hermes (https://github.com/facebook/react-native/issues/31152)
+// doing it manually
+const formatHertzString = (
+  frequency: number,
+  { digits }: { digits: number }
+) => {
+  const freqStr = frequency.toString();
+
+  const dotIndex = freqStr.indexOf(".");
+  if (dotIndex < 0) return freqStr;
+
+  const offset = digits + Number(!!digits);
+  return freqStr.substring(0, dotIndex + offset);
+};

@@ -15,7 +15,7 @@
     "updates": {
       "fallbackToCacheTimeout": 0
     },
-    "jsEngine": "jsc",
+    "jsEngine": "hermes",
     "ios": {
       "bundleIdentifier": "com.barthap.expomegademo",
       "supportsTablet": false

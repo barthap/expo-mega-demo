@@ -85,14 +85,16 @@ export default function PlayerScreen() {
 
   // Song unloading
   React.useEffect(() => {
-    return sound
-      ? () => {
-          console.log("Unloading Sound");
-          setTitle(null);
-          sound.unloadAsync();
-          runOnUI(fadeBinsDown)();
-        }
-      : undefined;
+    if (sound) {
+      return () => {
+        console.log("Unloading Sound");
+        setTitle(null);
+        sound.unloadAsync();
+        runOnUI(fadeBinsDown)();
+      };
+    } else {
+      return undefined;
+    }
   }, [sound]);
 
   const openPicker = async () => {
@@ -148,6 +150,7 @@ export default function PlayerScreen() {
     const binValues = calculateBins(freqs);
 
     runOnUI(updateBinHeights)(binValues);
+    const a = 2;
   };
 
   async function loadSound(uri: string) {

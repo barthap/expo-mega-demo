@@ -28,17 +28,19 @@ void AudioSampleCallbackWrapper::call(AudioBuffer* buffer, double timestamp)
     return;
   }
 
-  auto fn = [this, timestamp, buffer] {
-    auto channelsCount = (size_t) buffer->mNumberChannels;
-    auto framesCount = buffer->mDataByteSize / sizeof(float);
-    float *data = reinterpret_cast<float *>(buffer->mData);
-
+  // We need to invoke the callback from the JS thread, otherwise Hermes complains
+  strongWrapper->jsInvoker().invokeAsync([this, timestamp, buffer] {
     auto jsiCallbackWrapper = this->weakWrapper.lock();
-    if (!jsiCallbackWrapper || !data) {
+    if (!jsiCallbackWrapper) {
       return;
     }
     
     auto &rt = jsiCallbackWrapper->runtime();
+    
+    auto channelsCount = (size_t) buffer->mNumberChannels;
+    auto framesCount = buffer->mDataByteSize / sizeof(float);
+    float *data = reinterpret_cast<float *>(buffer->mData);
+    if (!data) return;
     
     auto channels = jsi::Array(rt, channelsCount);
     
@@ -66,9 +68,7 @@ void AudioSampleCallbackWrapper::call(AudioBuffer* buffer, double timestamp)
     sample.setProperty(rt, "timestamp", jsi::Value(timestamp));
 
     jsiCallbackWrapper->callback().call(rt, std::move(sample));
-  };
-  // We need to invoke the callback from the JS thread, otherwise Hermes complains
-  strongWrapper->jsInvoker().invokeAsync(std::move(fn));
+  });
 }
 
 } // namespace av
