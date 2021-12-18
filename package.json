@@ -13,7 +13,7 @@
     "run:ios": "expo run:ios -d"
   },
   "dependencies": {
-    "@config-plugins/react-native-ble-plx": "^0.0.1",
+    "@config-plugins/react-native-ble-plx": "^0.0.2",
     "@eva-design/eva": "^2.1.1",
     "@react-native-community/slider": "4.1.7",
     "@react-navigation/bottom-tabs": "^6.0.5",

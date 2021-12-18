@@ -1032,12 +1032,12 @@
     exec-sh "^0.3.2"
     minimist "^1.2.0"
 
-"@config-plugins/react-native-ble-plx@^0.0.1":
-  version "0.0.1"
-  resolved "https://registry.yarnpkg.com/@config-plugins/react-native-ble-plx/-/react-native-ble-plx-0.0.1.tgz#abfb734b25ee91b2e54e460d3f19121a30a184cf"
-  integrity sha512-j7fApnwMdWCOLB9ykmtj0zHuVmD9gzlUl8PL6R/DAb2DCJwLqoCWrTAzFPzgovK82gbnsyDLrnkQLzSPgB6uOQ==
+"@config-plugins/react-native-ble-plx@^0.0.2":
+  version "0.0.2"
+  resolved "https://registry.yarnpkg.com/@config-plugins/react-native-ble-plx/-/react-native-ble-plx-0.0.2.tgz#6f33be2d0dfaf6c6f92c58fb487bf8e2d54fe302"
+  integrity sha512-NKylw5isTT7Zskjx49dmBaDcgVi5JV83ZxO6mPDWkkswlrALzjlcGVfajsDWXzTSTt1XwLPHd9M7eAQ32X6acA==
   dependencies:
-    "@expo/config-plugins" "^3.0.3"
+    "@expo/config-plugins" "^4.0.7"
 
 "@egjs/hammerjs@^2.0.17":
   version "2.0.17"
@@ -1061,7 +1061,7 @@
   resolved "https://registry.yarnpkg.com/@eva-design/processor/-/processor-2.1.1.tgz#33a59efa52ee2d206ac4d912dae801d12f9275a8"
   integrity sha512-lbxZLm5ARhuk/wxWkaiWhw5XeZ+Xcp1JGCjcZl+S5rUbLppfp4U47jfq861EY27BP1dpQ5PyTVFCbl5eHlRFdg==
 
-"@expo/config-plugins@3.1.0", "@expo/config-plugins@^3.0.3", "@expo/config-plugins@^3.1.0":
+"@expo/config-plugins@3.1.0", "@expo/config-plugins@^3.1.0":
   version "3.1.0"
   resolved "https://registry.yarnpkg.com/@expo/config-plugins/-/config-plugins-3.1.0.tgz#0752ff33c5eab21cf42034a44e79df97f0f867f8"
   integrity sha512-V5qxaxCAExBM0TXmbU1QKiZcAGP3ecu7KXede8vByT15cro5PkcWu2sSdJCYbHQ/gw6Vf/i8sr8gKlN8V8TSLg==
@@ -1102,6 +1102,28 @@
     xcode "^3.0.1"
     xml2js "0.4.23"
 
+"@expo/config-plugins@^4.0.7":
+  version "4.0.14"
+  resolved "https://registry.yarnpkg.com/@expo/config-plugins/-/config-plugins-4.0.14.tgz#39353be207fe499f4e28703a6cbe7a577bc1b3bb"
+  integrity sha512-3UMo9STaIAQRAvtlXXIX83mrxWAh0prQYgVG+n2JRBwI9CWiRdj35W+jyXkTChtPYXGvW1JQF2xatjB8ituSvg==
+  dependencies:
+    "@expo/config-types" "^43.0.1"
+    "@expo/json-file" "8.2.34"
+    "@expo/plist" "0.0.16"
+    "@expo/sdk-runtime-versions" "^1.0.0"
+    "@react-native/normalize-color" "^2.0.0"
+    chalk "^4.1.2"
+    debug "^4.3.1"
+    find-up "~5.0.0"
+    fs-extra "9.0.0"
+    getenv "^1.0.0"
+    glob "7.1.6"
+    resolve-from "^5.0.0"
+    semver "^7.3.5"
+    slash "^3.0.0"
+    xcode "^3.0.1"
+    xml2js "0.4.23"
+
 "@expo/config-types@^42.0.0":
   version "42.0.0"
   resolved "https://registry.yarnpkg.com/@expo/config-types/-/config-types-42.0.0.tgz#3e3e125ec092c0c34dbfaf19be5480402de3d677"
@@ -1111,6 +1133,11 @@
   version "43.0.0"
   resolved "https://registry.yarnpkg.com/@expo/config-types/-/config-types-43.0.0.tgz#e283a4a1b72a655a6a2a745bd277caef58c8edb0"
   integrity sha512-GBbEtLdGX40DJ1wTixWtOHseupA5xWclV57KNZ58ebauWAOyK3Fyni7GD2OCOzxTIFi1nSjqgO9JlMp3ayP4Tw==
+
+"@expo/config-types@^43.0.1":
+  version "43.0.1"
+  resolved "https://registry.yarnpkg.com/@expo/config-types/-/config-types-43.0.1.tgz#3e047dccb371741a540980eaff26fb0c95039c30"
+  integrity sha512-EtllpCGDdB/UdwAIs5YXJwBLpbFQNdlLLrxIvoILA9cXrpQMWkeDCT9lQPJzFRMFcLUaMuGvkzX2tR4tx5EQFQ==
 
 "@expo/config@5.0.9", "@expo/config@^5.0.9":
   version "5.0.9"
@@ -1186,6 +1213,15 @@
     json5 "^1.0.1"
     write-file-atomic "^2.3.0"
 
+"@expo/json-file@8.2.34":
+  version "8.2.34"
+  resolved "https://registry.yarnpkg.com/@expo/json-file/-/json-file-8.2.34.tgz#2f24e90a677195f7a81e167115460eb2902c3130"
+  integrity sha512-ZxtBodAZGxdLtgKzmsC+8ViUxt1mhFW642Clu2OuG3f6PAyAFsU/SqEGag9wKFaD3x3Wt8VhL+3y5fMJmUFgPw==
+  dependencies:
+    "@babel/code-frame" "~7.10.4"
+    json5 "^1.0.1"
+    write-file-atomic "^2.3.0"
+
 "@expo/metro-config@~0.1.84":
   version "0.1.84"
   resolved "https://registry.yarnpkg.com/@expo/metro-config/-/metro-config-0.1.84.tgz#ddcc7b4f1087c29f86bc9d916933d29bacd2c726"
@@ -1214,6 +1250,15 @@
     base64-js "^1.2.3"
     xmlbuilder "^14.0.0"
 
+"@expo/plist@0.0.16":
+  version "0.0.16"
+  resolved "https://registry.yarnpkg.com/@expo/plist/-/plist-0.0.16.tgz#c7d294a774196cfa1d8caf89a75ba923f5d1d53c"
+  integrity sha512-yQMt2CTm2VNLiHv2/EqHYrHvfflI2mFJd+DZIQQy569hvpZle0CxMPGH1p2KatbrO8htxJNvwrlR/4TIwhQJ5w==
+  dependencies:
+    "@xmldom/xmldom" "~0.7.0"
+    base64-js "^1.2.3"
+    xmlbuilder "^14.0.0"
+
 "@expo/prebuild-config@^3.0.0":
   version "3.0.4"
   resolved "https://registry.yarnpkg.com/@expo/prebuild-config/-/prebuild-config-3.0.4.tgz#f36943832c582295ddc717e31faabfd4da8ab974"
@@ -1228,6 +1273,11 @@
     fs-extra "^9.0.0"
     resolve-from "^5.0.0"
     semver "7.3.2"
+
+"@expo/sdk-runtime-versions@^1.0.0":
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/@expo/sdk-runtime-versions/-/sdk-runtime-versions-1.0.0.tgz#d7ebd21b19f1c6b0395e50d78da4416941c57f7c"
+  integrity sha512-Doz2bfiPndXYFPMRwPyGa1k5QaKDVpY806UJj570epIiMzWaYyCtobasyfC++qfIXVb5Ocy7r3tP9d62hAQ7IQ==
 
 "@expo/spawn-async@1.5.0":
   version "1.5.0"
