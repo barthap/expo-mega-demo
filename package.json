@@ -12,6 +12,11 @@
     "prebuild:clean": "yarn run prebuild --clean",
     "run:ios": "expo run:ios -d"
   },
+  "expo": {
+    "autolinking": {
+      "nativeModulesDir": "./custom_native_modules"
+    }
+  },
   "dependencies": {
     "@config-plugins/react-native-ble-plx": "^0.0.2",
     "@eva-design/eva": "^2.1.1",
@@ -24,11 +29,9 @@
     "buffer": "^6.0.3",
     "colorsys": "https://github.com/netbeast/colorsys.git",
     "expo": "^44.0.0",
-    "expo-av-jsi": "./custom_native_modules/expo-av-jsi",
     "expo-dev-client": "~0.7.2",
     "expo-gl": "~11.1.1",
     "expo-gl-cpp": "~11.1.0",
-    "expo-music-picker": "./custom_native_modules/expo-music-picker",
     "expo-splash-screen": "~0.14.0",
     "expo-status-bar": "~1.2.0",
     "expo-updates": "~0.11.2",
