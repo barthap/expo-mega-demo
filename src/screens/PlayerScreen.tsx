@@ -9,7 +9,7 @@ import {
   Audio,
   AVPlaybackStatus,
   AVPlaybackStatusToSet,
-} from "../../custom_native_modules/expo-av-jsi/src";
+} from "../../custom_native_modules/expo-av";
 import {
   cancelAnimation,
   Extrapolate,
@@ -86,7 +86,7 @@ export default function PlayerScreen() {
   const unloadSound = () => {
     if (sound) {
       console.log("Unloading Sound");
-      sound.onAudioSampleReceived = undefined;
+      sound.setOnAudioSampleReceived(null);
       sound.unloadAsync();
       setTitle(null);
       runOnUI(fadeBinsDown)();
@@ -202,7 +202,7 @@ export default function PlayerScreen() {
 
   async function startPlaying() {
     console.log("Playing Sound");
-    sound.onAudioSampleReceived = onSampleReceived;
+    sound.setOnAudioSampleReceived(onSampleReceived);
     await sound.playAsync();
   }
 
@@ -212,7 +212,7 @@ export default function PlayerScreen() {
     // even after awaiting pauseAsync(), the sample callback
     // is still called a few times, which broke the "fade down" animation
     // - so it is removed here to prevent this.
-    sound.onAudioSampleReceived = undefined;
+    sound.setOnAudioSampleReceived(null);
     console.log("Paused");
 
     runOnUI(fadeBinsDown)();
