@@ -30,9 +30,8 @@
     "assetBundlePatterns": ["**/*"],
     "plugins": [
       "@config-plugins/react-native-ble-plx",
-      "./patches/fix-entitlements.plugin",
-      "./patches/fix-bluetooth.plugin",
       "expo-dev-client",
+      "./patches/fix-entitlements.plugin",
       "./custom_native_modules/expo-music-picker/app.plugin"
     ]
   },
