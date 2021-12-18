@@ -3,5 +3,8 @@
   "platforms": ["ios", "android"],
   "ios": {
     "modulesClassNames": ["MusicPickerModule"]
+  },
+  "android": {
+    "modulesClassNames": ["expo.modules.musicpicker.MusicPickerModule"]
   }
 }

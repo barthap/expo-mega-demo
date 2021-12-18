@@ -16,6 +16,7 @@ import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.DefaultRenderersFactory;
 import com.google.android.exoplayer2.ExoPlaybackException;
+import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.ExoPlayerFactory;
 import com.google.android.exoplayer2.Format;
 import com.google.android.exoplayer2.PlaybackParameters;
@@ -121,11 +122,19 @@ class SimpleExoPlayerData extends PlayerData
 
   @Override
   public synchronized void release() {
+    super.release();
     stopUpdatingProgressIfNecessary();
     if (mSimpleExoPlayer != null) {
       mSimpleExoPlayer.release();
       mSimpleExoPlayer = null;
     }
+  }
+
+  @Override
+  protected synchronized double getCurrentPositionSeconds() {
+    return 0.0;
+    // stupid ExoPlayer cannot get current position from different thread
+    // return (double)mSimpleExoPlayer.getCurrentPosition() / 1000.0;
   }
 
   @Override

@@ -16,7 +16,7 @@ A preview video (**click the image**):
 - Uses [Expo Dev Client](https://docs.expo.dev/clients/introduction/), react-navigation, ui-kitten
 - Bluetooth communication using [react-native-ble-plx](https://github.com/dotintent/react-native-ble-plx) with [config plugin](https://github.com/expo/config-plugins/tree/master/packages/react-native-ble-plx)
 - Color picker using Expo GL, made from [this tutorial from William Candillon](https://www.youtube.com/watch?v=bAZhVl9YvB4), but rewritten to [Reanimated v2](https://github.com/software-mansion/react-native-reanimated)
-- Music Picker is an expo-module written using [Swift "Sweet" API](https://blog.expo.dev/a-peek-into-the-upcoming-sweet-expo-module-api-6de6b9aca492).
+- Music Picker is an expo-module written using [Swift/Kotlin "Sweet" API](https://blog.expo.dev/a-peek-into-the-upcoming-sweet-expo-module-api-6de6b9aca492).
 - JSI real-time Audio streaming, _inspired by [this PR](https://github.com/expo/expo/pull/13516), thank you Marc!_
 
   Now it is included in upstream `expo-av@10.2.0` but yet for iOS only. It'a super-secret hidden feature of SDK 44.
@@ -45,10 +45,10 @@ Most of them are caused by limited time of mine, and also by some libraries, whi
 - Frequency bin labels are wrong 🤷. Eventually I needed to display them in log scale and I am too lazy to think about how to recalculate everything properly.
 - Modifying the `sound.setOnAudioSampleReceived` callback and the Reanimated 2 stuff requires at least picking the song again to reload properly, sometimes whole app restart is needed.
 - May not work on emulator. _The JSI Audio should work, but as far as I remember, the music picker does not open. And, of course, Bluetooth cannot work on simulator._
-- Not yet works for Android
-  - Waiting for Expo Modules architecture to support Kotlin DSL.
-  - The MusicPicker module isn't implemented yet for that platform for the above reason (instead there's a copy-pasted `expo-haptics` code ¯\_(ツ)\_/¯)
-  - No JSI-related `expo-av` changes applied.
+- ~~Not yet works for Android~~ There's basic experimental Android support, but with issues:
+  - GL View crashes
+  - JSI Audio crashes after few seconds
+  - ...
 
 ### Applied patches
 

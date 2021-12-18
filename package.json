@@ -5,12 +5,13 @@
   "version": "0.1.0",
   "scripts": {
     "postinstall": "patch-package",
-    "android": "echo \"Android is not supported yet!\" && exit 1",
+    "android": "yarn run run:android",
     "ios": "yarn run run:ios",
     "start": "expo start --dev-client",
-    "prebuild": "expo prebuild -p ios",
+    "prebuild": "expo prebuild",
     "prebuild:clean": "yarn run prebuild --clean",
-    "run:ios": "expo run:ios -d"
+    "run:ios": "expo run:ios -d",
+    "run:android": "expo run:android -d"
   },
   "expo": {
     "autolinking": {
@@ -34,7 +35,6 @@
     "expo-gl-cpp": "~11.1.0",
     "expo-splash-screen": "~0.14.0",
     "expo-status-bar": "~1.2.0",
-    "expo-updates": "~0.11.2",
     "gl-react": "^5.0.0",
     "gl-react-expo": "^5.0.0",
     "immer": "^9.0.6",

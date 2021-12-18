@@ -14,10 +14,14 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.SystemClock;
 
+import com.facebook.jni.HybridData;
+
 import expo.modules.core.ModuleRegistry;
 import expo.modules.core.Promise;
 import expo.modules.core.arguments.ReadableArguments;
+import expo.modules.core.interfaces.DoNotStrip;
 import expo.modules.core.interfaces.InternalModule;
+import expo.modules.core.interfaces.JavaScriptContextProvider;
 import expo.modules.core.interfaces.LifecycleEventListener;
 import expo.modules.core.interfaces.services.EventEmitter;
 import expo.modules.core.interfaces.services.UIManager;
@@ -38,10 +42,18 @@ import expo.modules.av.player.PlayerData;
 import expo.modules.av.video.VideoView;
 import expo.modules.av.video.VideoViewWrapper;
 import expo.modules.interfaces.permissions.Permissions;
+import expo.modules.interfaces.permissions.PermissionsResponseListener;
+
+import com.facebook.react.bridge.ReactContext;
+import com.facebook.react.turbomodule.core.CallInvokerHolderImpl;
 
 import static android.media.MediaRecorder.MEDIA_RECORDER_INFO_MAX_FILESIZE_REACHED;
 
 public class AVManager implements LifecycleEventListener, AudioManager.OnAudioFocusChangeListener, MediaRecorder.OnInfoListener, AVManagerInterface, InternalModule {
+  static {
+    System.loadLibrary("expo-av");
+  }
+
   private static final String AUDIO_MODE_SHOULD_DUCK_KEY = "shouldDuckAndroid";
   private static final String AUDIO_MODE_INTERRUPTION_MODE_KEY = "interruptionModeAndroid";
   private static final String AUDIO_MODE_PLAY_THROUGH_EARPIECE = "playThroughEarpieceAndroid";
@@ -56,6 +68,9 @@ public class AVManager implements LifecycleEventListener, AudioManager.OnAudioFo
   private static final String RECORDING_OPTION_NUMBER_OF_CHANNELS_KEY = "numberOfChannels";
   private static final String RECORDING_OPTION_BIT_RATE_KEY = "bitRate";
   private static final String RECORDING_OPTION_MAX_FILE_SIZE_KEY = "maxFileSize";
+
+  @DoNotStrip
+  private final HybridData mHybridData;
 
   private boolean mShouldRouteThroughEarpiece = false;
 
@@ -112,6 +127,26 @@ public class AVManager implements LifecycleEventListener, AudioManager.OnAudioFo
     mContext.registerReceiver(mNoisyAudioStreamReceiver,
       new IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY));
     mIsRegistered = true;
+
+
+    mHybridData = initHybrid();
+  }
+
+  @Override
+  protected void finalize() throws Throwable {
+    super.finalize();
+    mHybridData.resetNative();
+  }
+
+  @SuppressWarnings("JavaJniMissingFunction")
+  private native HybridData initHybrid();
+  @SuppressWarnings("JavaJniMissingFunction")
+  private native void installJSIBindings(long jsRuntimePointer, CallInvokerHolderImpl jsCallInvokerHolder);
+
+  @SuppressWarnings("unused")
+  @DoNotStrip
+  private PlayerData getMediaPlayerById(int id) {
+    return mSoundMap.get(id);
   }
 
   @Override
@@ -127,6 +162,14 @@ public class AVManager implements LifecycleEventListener, AudioManager.OnAudioFo
     mModuleRegistry = moduleRegistry;
     if (mModuleRegistry != null) {
       mModuleRegistry.getModule(UIManager.class).registerLifecycleEventListener(this);
+
+      final UIManager uiManager = mModuleRegistry.getModule(UIManager.class);
+      uiManager.runOnClientCodeQueueThread(() -> {
+        final JavaScriptContextProvider jsContextProvider = mModuleRegistry.getModule(JavaScriptContextProvider.class);
+        CallInvokerHolderImpl callInvoker = (CallInvokerHolderImpl) ((ReactContext) mContext).getCatalystInstance().getJSCallInvokerHolder();
+
+        installJSIBindings(jsContextProvider.getJavaScriptContextRef(), callInvoker);
+      });
     }
   }
 
@@ -514,8 +557,16 @@ public class AVManager implements LifecycleEventListener, AudioManager.OnAudioFo
 
   // Recording API
 
+  public boolean hasAudioPermission() {
+    return mModuleRegistry.getModule(Permissions.class).hasGrantedPermissions(Manifest.permission.RECORD_AUDIO);
+  }
+
+  public void requestAudioPermission(PermissionsResponseListener permissionsResponseListener) {
+    mModuleRegistry.getModule(Permissions.class).askForPermissions(permissionsResponseListener, Manifest.permission.RECORD_AUDIO);
+  }
+
   private boolean isMissingAudioRecordingPermissions() {
-    return !mModuleRegistry.getModule(Permissions.class).hasGrantedPermissions(Manifest.permission.RECORD_AUDIO);
+    return !hasAudioPermission();
   }
 
   // Rejects the promise and returns false if the MediaRecorder is not found.
