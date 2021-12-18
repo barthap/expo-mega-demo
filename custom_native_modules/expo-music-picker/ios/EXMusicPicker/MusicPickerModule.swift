@@ -5,11 +5,11 @@ public class MusicPickerModule: Module {
   public func definition() -> ModuleDefinition {
     name("ExpoMusicPicker")
     
-    method("sayHello") { (promise: Promise) in
+    function("sayHello") { (promise: Promise) in
       promise.resolve("Hello World")
     }
     
-    method("openPicker") { (options: Dictionary<String, Any>, promise: Promise) in
+    function("openPicker") { (options: Dictionary<String, Any>, promise: Promise) in
       self.delegate = PickerDelegate(promise: promise)
       DispatchQueue.main.async {
         self.picker = MPMediaPickerController(mediaTypes: .anyAudio)
