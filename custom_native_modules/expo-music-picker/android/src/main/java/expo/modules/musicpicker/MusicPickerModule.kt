@@ -17,13 +17,13 @@ class MusicPickerModule : Module() {
   private var pendingPromise: Promise? = null
 
   override fun definition() = ModuleDefinition {
-    name(moduleName)
+    Name(moduleName)
 
-    function("sayHello") {
+    AsyncFunction("sayHello") {
       "Hello World! Android"
     }
 
-    function("openPicker") { options: Map<String, String>, promise: Promise ->
+    AsyncFunction("openPicker") { options: Map<String, String>, promise: Promise ->
       val intent = Intent(
               Intent.ACTION_GET_CONTENT,
               MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
@@ -39,12 +39,11 @@ class MusicPickerModule : Module() {
               INTENT_REQUEST_ID,
               null
       )
-      Unit
     }
 
-    onActivityResult { activity, (requestCode, resultCode, data) ->
+    OnActivityResult { activity, (requestCode, resultCode, data) ->
       if (requestCode != INTENT_REQUEST_ID || pendingPromise == null) {
-        return@onActivityResult
+        return@OnActivityResult
       }
 
       if (resultCode == RESULT_CANCELED) {
