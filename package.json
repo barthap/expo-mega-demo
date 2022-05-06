@@ -30,6 +30,7 @@
     "buffer": "^6.0.3",
     "colorsys": "https://github.com/netbeast/colorsys.git",
     "expo": "^45.0.0",
+    "expo-av": "~11.2.3",
     "expo-dev-client": "~0.9.4",
     "expo-gl": "~11.3.0",
     "expo-gl-cpp": "~11.3.0",
