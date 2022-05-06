@@ -7,11 +7,11 @@
     "postinstall": "patch-package",
     "android": "yarn run run:android",
     "ios": "yarn run run:ios",
-    "start": "expo start --dev-client",
-    "prebuild": "expo prebuild",
-    "prebuild:clean": "yarn run prebuild --clean",
-    "run:ios": "expo run:ios -d",
-    "run:android": "expo run:android -d"
+    "start": "npx expo start --dev-client",
+    "prebuild": "npx expo prebuild",
+    "prebuild:clean": "npx yarn run prebuild --clean",
+    "run:ios": "npx expo run:ios -d",
+    "run:android": "npx expo run:android -d"
   },
   "expo": {
     "autolinking": {
