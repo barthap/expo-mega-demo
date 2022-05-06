@@ -2,7 +2,7 @@ import * as React from "react";
 
 import { Ionicons } from "@expo/vector-icons";
 import Slider from "@react-native-community/slider";
-import { AVMetadata } from "../../custom_native_modules/expo-av-jsi/src";
+import { AVMetadata } from "expo-av";
 import {
   GestureResponderEvent,
   StyleProp,
