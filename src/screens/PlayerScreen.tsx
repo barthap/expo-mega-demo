@@ -5,11 +5,7 @@ import { Layout, Toggle } from "@ui-kitten/components";
 import MusicPicker, {
   Song,
 } from "../../custom_native_modules/expo-music-picker/src/MusicPicker";
-import {
-  Audio,
-  AVPlaybackStatus,
-  AVPlaybackStatusToSet,
-} from "../../custom_native_modules/expo-av";
+import { Audio, AVPlaybackStatus, AVPlaybackStatusToSet } from "expo-av";
 import {
   cancelAnimation,
   Extrapolate,
