@@ -47,12 +47,16 @@ class PickerDelegate: NSObject, MPMediaPickerControllerDelegate {
         }
         
         let song = mediaItemCollection.items[0]
+        let artist = song.artist
+        let title = song.title
+        let displayName = artist != nil ? "\(artist ?? "Unknown artist") - \(title ?? "Untitled")" : title
         
         let result: NSDictionary = [
           "canceled": false,
-          "artist": song.artist as Any,
           "uri": song.assetURL?.absoluteString as Any,
-          "title": song.title as Any
+          "artist": artist as Any,
+          "title": title as Any,
+          "displayName": displayName as Any,
         ]
         
         self.promise.resolve(result)

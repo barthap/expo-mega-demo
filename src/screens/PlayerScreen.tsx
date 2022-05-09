@@ -29,8 +29,8 @@ import shallow from "zustand/shallow";
 import { isDeviceSupported, sendCommandTo } from "../bluetooth/BluetoothDevice";
 import PlayerControls from "../components/PlayerControls";
 
-function prepareSongDisplayName({ artist, title }: Song) {
-  return artist ? `${artist} - ${title}` : title;
+function prepareSongDisplayName({ artist, title, displayName }: Song) {
+  return displayName || (artist ? `${artist} - ${title}` : title);
 }
 
 const FFT_SIZE = 2048;

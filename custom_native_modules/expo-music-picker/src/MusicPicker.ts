@@ -6,6 +6,7 @@ export interface Song {
   uri: string;
   title: string;
   artist: string | null;
+  displayName: string;
 }
 
 interface PickerResultBase {
