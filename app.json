@@ -31,10 +31,8 @@
     "assetBundlePatterns": ["**/*"],
     "plugins": [
       "@config-plugins/react-native-ble-plx",
-      "expo-dev-client",
       "./patches/fix-entitlements.plugin",
       "./custom_native_modules/expo-music-picker/app.plugin"
     ]
-  },
-  "name": "expo-mega-demo"
+  }
 }
