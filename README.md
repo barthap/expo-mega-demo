@@ -17,6 +17,7 @@ A preview video (**click the image**):
 - Bluetooth communication using [react-native-ble-plx](https://github.com/dotintent/react-native-ble-plx) with [config plugin](https://github.com/expo/config-plugins/tree/main/packages/react-native-ble-plx)
 - Color picker using Expo GL, made from [this tutorial from William Candillon](https://www.youtube.com/watch?v=bAZhVl9YvB4), but rewritten to [Reanimated v2](https://github.com/software-mansion/react-native-reanimated)
 - Music Picker is an expo-module written using [Swift/Kotlin "Sweet" API](https://blog.expo.dev/a-peek-into-the-upcoming-sweet-expo-module-api-6de6b9aca492).
+  > 🎉 It is now available as a separate library: [expo-music-picker](https://github.com/barthap/expo-music-picker)!
 - JSI real-time Audio streaming, _inspired by [this PR](https://github.com/expo/expo/pull/13516), thank you Marc!_
 
   Now it is included in upstream `expo-av@11.2.3` (Expo SDK 45) so a custom native module is no longer needed!
@@ -31,6 +32,7 @@ A preview video (**click the image**):
 First time:
 
 1. Make sure you have Expo and all the stuff installed and configured (including Xcode)
+1. Clone the repo and update submodules: `git submodule update`.
 1. `yarn install`
 1. `yarn prebuild`
 1. `yarn run:ios`
