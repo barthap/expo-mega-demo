@@ -1,0 +1,4 @@
+[submodule "custom_native_modules/expo-music-picker"]
+	path = custom_native_modules/expo-music-picker
+	url = https://github.com/barthap/expo-music-picker.git
+	branch = main
