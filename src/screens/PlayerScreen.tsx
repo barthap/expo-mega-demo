@@ -2,9 +2,8 @@ import React from "react";
 import { StyleSheet, View } from "react-native";
 import { Layout, Toggle } from "@ui-kitten/components";
 
-import MusicPicker, {
-  Song,
-} from "../../custom_native_modules/expo-music-picker/src/MusicPicker";
+// TODO: Maybe configure this with tsconfig, babel and metro.config
+import * as MusicPicker from "../../custom_native_modules/expo-music-picker/src/ExpoMusicPicker";
 import { Audio, AVPlaybackStatus, AVPlaybackStatusToSet } from "expo-av";
 import {
   cancelAnimation,
@@ -29,8 +28,8 @@ import shallow from "zustand/shallow";
 import { isDeviceSupported, sendCommandTo } from "../bluetooth/BluetoothDevice";
 import PlayerControls from "../components/PlayerControls";
 
-function prepareSongDisplayName({ artist, title, displayName }: Song) {
-  return displayName || (artist ? `${artist} - ${title}` : title);
+function prepareSongDisplayName({ artist, title }: MusicPicker.MusicItem) {
+  return (artist ? `${artist} - ${title}` : title) || "Untitled";
 }
 
 const FFT_SIZE = 2048;
@@ -97,12 +96,16 @@ export default function PlayerScreen() {
   }, []);
 
   const openPicker = async () => {
-    const song = await MusicPicker.openPicker({});
-    console.log("Song:", song);
+    const result = await MusicPicker.openMusicLibraryAsync({
+      allowMultipleSelection: false,
+      includeArtworkImage: false,
+    });
 
-    if (song.canceled !== false) {
+    if (result.cancelled !== false || result.items.length !== 1) {
       return;
     }
+    const [song] = result.items;
+    console.log("Song:", song);
 
     loadSound(song.uri);
     setTitle(prepareSongDisplayName(song));
