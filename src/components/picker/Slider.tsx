@@ -4,10 +4,9 @@ import Animated, {
   SharedValue,
   useSharedValue,
   useAnimatedStyle,
-  useAnimatedGestureHandler,
   runOnJS,
 } from "react-native-reanimated";
-import { PanGestureHandler } from "react-native-gesture-handler";
+import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import { clamp } from "react-native-redash";
 
 const KNOB_SIZE = 30;
@@ -44,44 +43,44 @@ export default ({ v, bg1, bg2, onGestureEnd, width }: SliderProps) => {
   const upperBound = width - KNOB_SIZE;
   const translationX = useSharedValue(upperBound);
 
-  const gestureHandler = useAnimatedGestureHandler({
-    onStart(_, ctx: { start: number }) {
-      ctx.start = translationX.value;
-    },
-    onActive(event, ctx) {
-      const newX = clamp(ctx.start + event.translationX, 0, upperBound);
+  const startX = useSharedValue(upperBound);
+  const gesture = Gesture.Pan()
+    .onStart((_) => {
+      startX.value = translationX.value;
+    })
+    .onUpdate((event) => {
+      const newX = clamp(startX.value + event.translationX, 0, upperBound);
 
       translationX.value = newX;
       v.value = translationX.value / upperBound;
-    },
-    onEnd: () => {
+    })
+    .onEnd(() => {
       runOnJS(onGestureEnd)();
-    },
-  });
+    });
 
   const bg1Style = useAnimatedStyle(
     () => ({ backgroundColor: bg1.value }),
-    [bg1]
+    [bg1],
   );
   const bg2Style = useAnimatedStyle(
     () => ({ backgroundColor: bg2.value }),
-    [bg2]
+    [bg2],
   );
 
   const sliderStyle = useAnimatedStyle(
     () => ({
       transform: [{ translateX: translationX.value }],
     }),
-    [translationX]
+    [translationX],
   );
 
   return (
     <View>
       <Animated.View style={[styles.background, bg2Style]} />
       <Animated.View style={[styles.container, bg1Style]}>
-        <PanGestureHandler onGestureEvent={gestureHandler}>
+        <GestureDetector gesture={gesture}>
           <Animated.View style={[styles.cursor, sliderStyle]} />
-        </PanGestureHandler>
+        </GestureDetector>
       </Animated.View>
     </View>
   );

@@ -1,7 +1,7 @@
 /* eslint-disable max-len */
 import React from "react";
 import { Dimensions, StyleSheet, View } from "react-native";
-import { PanGestureHandler } from "react-native-gesture-handler";
+import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Svg, { Path } from "react-native-svg";
 import Animated, {
   pow,
@@ -37,14 +37,17 @@ export default ({ h, s, onGestureEnd, backgroundColor }: PickerProps) => {
   const x = useSharedValue(CENTER.x);
   const y = useSharedValue(CENTER.y);
 
-  const eventHandler = useAnimatedGestureHandler({
-    onStart: (_, ctx: { startX: number; startY: number }) => {
-      ctx.startX = x.value;
-      ctx.startY = y.value;
-    },
-    onActive: (event, ctx) => {
-      const newX = ctx.startX + event.translationX;
-      const newY = ctx.startY + event.translationY;
+  const startX = useSharedValue(CENTER.x);
+  const startY = useSharedValue(CENTER.y);
+
+  const gesture = Gesture.Pan()
+    .onStart((_) => {
+      startX.value = x.value;
+      startY.value = y.value;
+    })
+    .onUpdate((event) => {
+      const newX = startX.value + event.translationX;
+      const newY = startY.value + event.translationY;
       const polar = canvas2Polar({ x: newX, y: newY }, CENTER);
       const l = {
         theta: polar.theta,
@@ -59,11 +62,10 @@ export default ({ h, s, onGestureEnd, backgroundColor }: PickerProps) => {
 
       h.value = hue;
       s.value = saturation * saturation;
-    },
-    onEnd: () => {
+    })
+    .onEnd(() => {
       runOnJS(onGestureEnd)();
-    },
-  });
+    });
 
   const pickerStyle = useAnimatedStyle(() => {
     return {
@@ -82,7 +84,7 @@ export default ({ h, s, onGestureEnd, backgroundColor }: PickerProps) => {
 
   return (
     <View style={StyleSheet.absoluteFill}>
-      <PanGestureHandler onGestureEvent={eventHandler}>
+      <GestureDetector gesture={gesture}>
         <Animated.View
           style={[
             {
@@ -115,7 +117,7 @@ export default ({ h, s, onGestureEnd, backgroundColor }: PickerProps) => {
             />
           </Svg>
         </Animated.View>
-      </PanGestureHandler>
+      </GestureDetector>
     </View>
   );
 };

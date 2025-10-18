@@ -9,7 +9,7 @@ import ColorPicker from "../components/picker";
 export default function RGBControlScreen() {
   const [isConnected, device] = useDevicesStore(
     (state) => [state.connectedDevice != null, state.connectedDevice],
-    shallow
+    shallow,
   );
 
   const [command, setCommand] = React.useState("");

@@ -11,6 +11,7 @@ import { EvaIconsPack } from "@ui-kitten/eva-icons";
 import { StatusBar } from "expo-status-bar";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { default as theme } from "../assets/custom-theme.json";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 // SplashScreen on dev-client has some issues
 // disable logs for now
@@ -37,14 +38,16 @@ function ThemedSafeArea(props) {
 
 export default function App() {
   return (
-    <SafeAreaProvider>
-      <IconRegistry icons={EvaIconsPack} />
-      <StatusBar style="dark" />
-      <ApplicationProvider {...eva} theme={{ ...eva.dark, ...theme }}>
-        <ThemedSafeArea style={{ flex: 1 }}>
-          <Navigation />
-        </ThemedSafeArea>
-      </ApplicationProvider>
-    </SafeAreaProvider>
+    <GestureHandlerRootView>
+      <SafeAreaProvider>
+        <IconRegistry icons={EvaIconsPack} />
+        <StatusBar style="dark" />
+        <ApplicationProvider {...eva} theme={{ ...eva.dark, ...theme }}>
+          <ThemedSafeArea style={{ flex: 1 }}>
+            <Navigation />
+          </ThemedSafeArea>
+        </ApplicationProvider>
+      </SafeAreaProvider>
+    </GestureHandlerRootView>
   );
 }

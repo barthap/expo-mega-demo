@@ -49,7 +49,7 @@ const MAX_BIN_FREQ = BIN_WIDTH * N_SAMPLES_TO_PROCESS;
 const calculateBins = makeOptimalQuadraticBinsForSamples(
   NUM_BINS,
   N_SAMPLES_TO_PROCESS,
-  LOG_COEFF
+  LOG_COEFF,
 );
 
 const initialState: AVPlaybackStatusToSet & {
@@ -96,6 +96,11 @@ export default function PlayerScreen() {
   }, []);
 
   const openPicker = async () => {
+    const permissions = await MusicPicker.requestPermissionsAsync();
+    if (!permissions.granted) {
+      console.log("No permission");
+      return;
+    }
     const result = await MusicPicker.openMusicLibraryAsync({
       allowMultipleSelection: false,
       includeArtworkImage: false,
@@ -118,7 +123,7 @@ export default function PlayerScreen() {
         values[i],
         [0, 90, 200, 900],
         [1, 60, 90, 100],
-        Extrapolate.CLAMP
+        Extrapolate.CLAMP,
       );
     }
   };
@@ -145,7 +150,7 @@ export default function PlayerScreen() {
     // then single original bin width = 21Hz (still)
     // we just ignore the higher part
     const freqs = cfft(sample.channels[0].frames.slice(0, FFT_SIZE)).map((n) =>
-      n.mag()
+      n.mag(),
     );
 
     if (freqs.some(isNaN)) return;
@@ -164,7 +169,7 @@ export default function PlayerScreen() {
 
     const { sound, status: newStatus } = await Audio.Sound.createAsync(
       { uri },
-      { progressUpdateIntervalMillis: 150 }
+      { progressUpdateIntervalMillis: 150 },
     );
     setStatus(newStatus);
     sound.setOnPlaybackStatusUpdate(setStatus);
@@ -176,7 +181,7 @@ export default function PlayerScreen() {
     setBtMusicEnabled((previousState) => !previousState);
   const [isConnected, device] = useDevicesStore(
     (state) => [state.connectedDevice != null, state.connectedDevice],
-    shallow
+    shallow,
   );
 
   const updateBtLedRgb = async () => {

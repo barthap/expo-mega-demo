@@ -35,7 +35,7 @@ export default function AudioSpectrum({ bins, frequencyRange, height }: Props) {
   const [lowFreq, highFreq] = frequencyRange;
   const midFreq = React.useMemo(
     () => Math.pow(10, Math.log10(lowFreq * highFreq) / 2),
-    [lowFreq, highFreq]
+    [lowFreq, highFreq],
   );
 
   const animatedStyles: any[] = new Array(bins.length);
@@ -49,13 +49,14 @@ export default function AudioSpectrum({ bins, frequencyRange, height }: Props) {
         rawBin,
         [1, 100],
         [1, height],
-        Extrapolate.CLAMP
+        Extrapolate.CLAMP,
       );
       return {
+        // TODO: Not sure why these don't work anymore
         height: withSpring(value, {
-          mass: 1,
-          damping: 500,
-          stiffness: 1000,
+          // mass: 1,
+          // damping: 500,
+          // stiffness: 1000,
         }),
       };
     }, [bins[i]]);
@@ -107,7 +108,7 @@ const styles = StyleSheet.create({
 // doing it manually
 const formatHertzString = (
   frequency: number,
-  { digits }: { digits: number }
+  { digits }: { digits: number },
 ) => {
   const freqStr = frequency.toString();
 

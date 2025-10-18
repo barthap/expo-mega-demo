@@ -55,11 +55,12 @@ export default ({ backgroundColor, h, s, v, onGestureEnd }: HeaderProps) => {
     const { r, g, b } = hsv2rgb(h.value, s.value, 1);
     return processColor(rgb2hex(r, g, b));
   }, [h, s]);
-  const fullySaturatedStyle = useAnimatedStyle(() => {
-    return {
+  const fullySaturatedStyle = useAnimatedStyle(
+    () => ({
       backgroundColor: fullySaturatedColor.value,
-    };
-  }, [fullySaturatedColor]);
+    }),
+    [fullySaturatedColor],
+  );
 
   return (
     <View>

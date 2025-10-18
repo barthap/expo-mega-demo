@@ -15,13 +15,11 @@
     "updates": {
       "fallbackToCacheTimeout": 0
     },
-    "jsEngine": "hermes",
     "ios": {
       "bundleIdentifier": "com.barthap.expomegademo",
       "supportsTablet": false
     },
     "android": {
-      "jsEngine": "jsc",
       "package": "com.barthap.expomegademo",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
@@ -30,7 +28,7 @@
     },
     "assetBundlePatterns": ["**/*"],
     "plugins": [
-      "@config-plugins/react-native-ble-plx",
+      "react-native-ble-plx",
       "./patches/fix-entitlements.plugin",
       "./custom_native_modules/expo-music-picker/app.plugin"
     ]

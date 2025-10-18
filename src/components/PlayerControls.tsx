@@ -1,6 +1,6 @@
 import * as React from "react";
 
-import { Ionicons } from "@expo/vector-icons";
+import Ionicons from "@expo/vector-icons/Ionicons";
 import Slider from "@react-native-community/slider";
 import { AVMetadata } from "expo-av";
 import {
@@ -100,12 +100,12 @@ function Player(props: Props) {
   const _renderPlayPauseButton = () => {
     let onPress = _pause;
     // let iconName = 'pause-circle-outline';
-    let iconName = "ios-pause";
+    let iconName = "pause";
 
     if (!props.isPlaying) {
       onPress = _play;
       // iconName = 'play-circle-outline';
-      iconName = "ios-play";
+      iconName = "play";
     }
 
     return (
@@ -118,7 +118,7 @@ function Player(props: Props) {
       //   />
       <TouchableOpacity onPress={onPress} disabled={!props.isLoaded}>
         <Ionicons
-          name={iconName as "ios-pause" | "ios-play"}
+          name={iconName as "pause" | "ios-play"}
           style={[
             styles.icon,
             styles.playPauseIcon,
@@ -154,7 +154,7 @@ function Player(props: Props) {
         onPress={onPress}
       >
         <Ionicons
-          name={`ios-${iconName}` as any}
+          name={`${iconName}` as any}
           size={iconName === "refresh" ? 20 : 24}
           style={[
             styles.icon,
@@ -325,12 +325,7 @@ function VolumeSlider({
         }}
       >
         <Ionicons
-          name={
-            `ios-${iconName}` as
-              | "ios-volume-high"
-              | "ios-volume-low"
-              | "ios-volume-off"
-          }
+          name={`${iconName}` as "volume-high" | "volume-low" | "volume-off"}
           size={24}
           color={color}
           style={{}}
@@ -369,7 +364,7 @@ const _formatTime = (duration: number) => {
 const _leftPad = (
   s: string,
   padWith: string,
-  expectedMinimumSize: number
+  expectedMinimumSize: number,
 ): string => {
   if (s.length >= expectedMinimumSize) {
     return s;
