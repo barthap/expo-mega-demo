@@ -4,18 +4,15 @@ import { Dimensions, StyleSheet, View } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Svg, { Path } from "react-native-svg";
 import Animated, {
-  pow,
   SharedValue,
   useSharedValue,
-  useAnimatedGestureHandler,
   useAnimatedStyle,
-  runOnJS,
   useAnimatedProps,
 } from "react-native-reanimated";
 import { canvas2Polar, clamp, polar2Canvas } from "react-native-redash";
+import { scheduleOnRN } from "react-native-worklets";
 
 const AnimatedPath = Animated.createAnimatedComponent(Path);
-const quadraticIn = (t: Animated.Node<number>) => pow(t, 2);
 const { width } = Dimensions.get("window");
 const PICKER_WIDTH = 30;
 const PICKER_HEIGHT = (PICKER_WIDTH * 60) / 40;
@@ -64,7 +61,7 @@ export default ({ h, s, onGestureEnd, backgroundColor }: PickerProps) => {
       s.value = saturation * saturation;
     })
     .onEnd(() => {
-      runOnJS(onGestureEnd)();
+      scheduleOnRN(onGestureEnd);
     });
 
   const pickerStyle = useAnimatedStyle(() => {

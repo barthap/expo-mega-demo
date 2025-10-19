@@ -7,7 +7,7 @@ import * as MusicPicker from "../../custom_native_modules/expo-music-picker/src/
 import { Audio, AVPlaybackStatus, AVPlaybackStatusToSet } from "expo-av";
 import {
   cancelAnimation,
-  Extrapolate,
+  Extrapolation,
   interpolate,
   useSharedValue,
   withTiming,
@@ -123,7 +123,7 @@ export default function PlayerScreen() {
         values[i],
         [0, 90, 200, 900],
         [1, 60, 90, 100],
-        Extrapolate.CLAMP,
+        Extrapolation.CLAMP,
       );
     }
   };
