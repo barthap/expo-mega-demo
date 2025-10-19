@@ -9,10 +9,10 @@ import {
   cancelAnimation,
   Extrapolate,
   interpolate,
-  runOnUI,
   useSharedValue,
   withTiming,
 } from "react-native-reanimated";
+import { scheduleOnUI } from "react-native-worklets";
 import { cfft } from "../math/fft";
 import {
   convWidthForNumBins,
@@ -84,7 +84,7 @@ export default function PlayerScreen() {
       sound.setOnAudioSampleReceived(null);
       sound.unloadAsync();
       setTitle(null);
-      runOnUI(fadeBinsDown)();
+      scheduleOnUI(fadeBinsDown);
     }
   };
 
@@ -156,7 +156,7 @@ export default function PlayerScreen() {
     if (freqs.some(isNaN)) return;
     const binValues = calculateBins(freqs);
 
-    runOnUI(updateBinHeights)(binValues);
+    scheduleOnUI(updateBinHeights, binValues);
     const a = 2;
   };
 
@@ -219,7 +219,7 @@ export default function PlayerScreen() {
     sound.setOnAudioSampleReceived(null);
     console.log("Paused");
 
-    runOnUI(fadeBinsDown)();
+    scheduleOnUI(fadeBinsDown);
   }
 
   const [dim, onLayout] = useMeasure();
