@@ -4,7 +4,7 @@ import { Layout, Toggle } from "@ui-kitten/components";
 
 // TODO: Maybe configure this with tsconfig, babel and metro.config
 import * as MusicPicker from "../../custom_native_modules/expo-music-picker/src/ExpoMusicPicker";
-import { Audio, AVPlaybackStatus, AVPlaybackStatusToSet } from "expo-av";
+import { useAudioPlayer, useAudioPlayerStatus, useAudioSampleListener, AudioSample, setAudioModeAsync } from "expo-audio";
 import {
   cancelAnimation,
   Extrapolation,
@@ -52,38 +52,42 @@ const calculateBins = makeOptimalQuadraticBinsForSamples(
   LOG_COEFF,
 );
 
-const initialState: AVPlaybackStatusToSet & {
-  isPlaying: boolean;
-  durationMillis: number;
-} = {
-  isMuted: false,
-  isLooping: false,
-  isPlaying: false,
-  shouldPlay: false,
-  positionMillis: 0,
-  durationMillis: 0,
-  volume: 1,
+type Song = {
+  title: string;
+  uri: string
 };
 
-Audio.setAudioModeAsync({
-  playsInSilentModeIOS: true,
-});
-
 export default function PlayerScreen() {
-  const [status, setStatus] = React.useState<AVPlaybackStatus>();
-  const [sound, setSound] = React.useState<Audio.Sound>();
-  const [title, setTitle] = React.useState<string | null>(null);
+  const [song, setSong] = React.useState<Song | null>(null);
+
+  const player = useAudioPlayer(song?.uri);
+  const playerStatus = useAudioPlayerStatus(player);
+  
+  React.useEffect(() => {
+    void setAudioModeAsync({
+      playsInSilentMode: true
+    });
+  }, []);
+  
+  React.useEffect(() => {
+    console.log('State:', playerStatus.playbackState);
+    console.log('Status:', playerStatus.timeControlStatus);
+  }, [playerStatus.playbackState, playerStatus.timeControlStatus]);
 
   // eslint-disable-next-line react-hooks/rules-of-hooks
   // as long as the hooks are always called in the same order, it's ok
   const bins = [...new Array(NUM_BINS)].map(() => useSharedValue(1));
 
   const unloadSound = () => {
-    if (sound) {
+    if (song) {
       console.log("Unloading Sound");
-      sound.setOnAudioSampleReceived(null);
-      sound.unloadAsync();
-      setTitle(null);
+      try {
+        player.setAudioSamplingEnabled(false);
+      } catch {
+        console.log("WARN: Audio shared object already removed")
+      }
+      
+      setSong(null);
       scheduleOnUI(fadeBinsDown);
     }
   };
@@ -109,11 +113,20 @@ export default function PlayerScreen() {
     if (result.cancelled !== false || result.items.length !== 1) {
       return;
     }
-    const [song] = result.items;
-    console.log("Song:", song);
+    const [selectedSong] = result.items;
+    
+    if (selectedSong.uri == song?.uri) {
+      // the same song selected, do nothing
+      return;
+    }
 
-    loadSound(song.uri);
-    setTitle(prepareSongDisplayName(song));
+    console.log("Song:", selectedSong);
+    console.log("Loading Sound");
+    console.log("Bin width", BIN_WIDTH);
+    console.log("Display bin width", DISPLAY_BIN_WIDTH);
+    console.log("Max bin freq", MAX_BIN_FREQ);
+    unloadSound(); // unload previous song, if exists
+    setSong({ uri: selectedSong.uri, title: prepareSongDisplayName(selectedSong) });
   };
 
   const updateBinHeights = (values: number[]) => {
@@ -121,7 +134,7 @@ export default function PlayerScreen() {
     for (let i = 0; i < NUM_BINS; i++) {
       bins[i].value = interpolate(
         values[i],
-        [0, 90, 200, 900],
+        [0, 80, 120, 200],
         [1, 60, 90, 100],
         Extrapolation.CLAMP,
       );
@@ -136,7 +149,7 @@ export default function PlayerScreen() {
     }
   };
 
-  const onSampleReceived = (sample: Audio.AudioSample) => {
+  const onSampleReceived = (sample: AudioSample) => {
     // Considerations below do not respect log scale!
     // sample rate = 44.1 kHz
     // picking 2048 samples -> 1024 usable bins
@@ -149,33 +162,15 @@ export default function PlayerScreen() {
     // but let's take 512 of these bins (bandwidth = 11 kHz)
     // then single original bin width = 21Hz (still)
     // we just ignore the higher part
-    const freqs = cfft(sample.channels[0].frames.slice(0, FFT_SIZE)).map((n) =>
-      n.mag(),
-    );
+    const samples = sample.channels[0].frames.slice(0, FFT_SIZE);
+    const freqs = cfft(samples).map((n) => n.mag());
 
     if (freqs.some(isNaN)) return;
     const binValues = calculateBins(freqs);
-
     scheduleOnUI(updateBinHeights, binValues);
-    const a = 2;
   };
+  useAudioSampleListener(player, onSampleReceived);
 
-  async function loadSound(uri: string) {
-    unloadSound(); // unload previous song, if exists
-    console.log("Loading Sound");
-    console.log("Bin width", BIN_WIDTH);
-    console.log("Display bin width", DISPLAY_BIN_WIDTH);
-    console.log("Max bin freq", MAX_BIN_FREQ);
-
-    const { sound, status: newStatus } = await Audio.Sound.createAsync(
-      { uri },
-      { progressUpdateIntervalMillis: 150 },
-    );
-    setStatus(newStatus);
-    sound.setOnPlaybackStatusUpdate(setStatus);
-
-    setSound(sound);
-  }
   const [isBtMusicEnabled, setBtMusicEnabled] = React.useState(false);
   const toggleSwitch = () =>
     setBtMusicEnabled((previousState) => !previousState);
@@ -206,17 +201,16 @@ export default function PlayerScreen() {
 
   async function startPlaying() {
     console.log("Playing Sound");
-    sound.setOnAudioSampleReceived(onSampleReceived);
-    await sound.playAsync();
+    player.setAudioSamplingEnabled(true);
+    player.play();
   }
 
   async function stopPlaying() {
-    await sound?.pauseAsync();
+    player.pause();
 
-    // even after awaiting pauseAsync(), the sample callback
-    // is still called a few times, which broke the "fade down" animation
-    // - so it is removed here to prevent this.
-    sound.setOnAudioSampleReceived(null);
+    // even after pausing, the sample callback might still be called a few times,
+    // which breaks the "fade down" animation - so it is removed here to prevent this.
+    player.setAudioSamplingEnabled(false);
     console.log("Paused");
 
     scheduleOnUI(fadeBinsDown);
@@ -224,22 +218,22 @@ export default function PlayerScreen() {
 
   const [dim, onLayout] = useMeasure();
 
-  const _replayAsync = async () => sound?.replayAsync();
+  const _replayAsync = async () => { await player.seekTo(0); player.play(); }
   const _setPositionAsync = async (position: number) =>
-    sound?.setPositionAsync(position);
+    player.seekTo(position)
   const _setIsLoopingAsync = async (isLooping: boolean) =>
-    sound?.setIsLoopingAsync(isLooping);
+    { player.loop = isLooping; }
   const _setIsMutedAsync = async (isMuted: boolean) =>
-    sound?.setIsMutedAsync(isMuted);
+    { player.muted = isMuted; }
   const _setVolumeAsync = async (volume: number) =>
-    sound?.setVolumeAsync(volume);
+{ player.volume = volume; }
 
   return (
     <Layout style={styles.container} level="2">
       <PlayerControls
-        {...(initialState as any)}
-        {...status}
-        metadata={{ title }}
+        playerStatus={playerStatus}
+        title={song?.title}
+        volume={player.volume}
         playAsync={startPlaying}
         pauseAsync={stopPlaying}
         replayAsync={_replayAsync}

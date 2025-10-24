@@ -22,7 +22,7 @@ A preview video (**click the image**):
   > 🎉 It is now available as a separate library: [expo-music-picker](https://github.com/barthap/expo-music-picker)!
 - JSI real-time Audio streaming, _inspired by [this PR](https://github.com/expo/expo/pull/13516), thank you Marc!_
 
-  Now it is included in upstream `expo-av@11.2.3` (Expo SDK 45) so a custom native module is no longer needed!
+  Now it is included in `expo-audio` so a custom native module is no longer needed!
 
 - Player controls stolen from NCL (internal Expo rn-tester equivalent).
 - FFT is calculated in the JS thread. The spectrum bin heights are written to `SharedValue`s and animated with Reanimated 4.
@@ -46,8 +46,12 @@ Just to start the bundler (without rebuilding client): run `yarn start`.
 Most of them are caused by limited time of mine, and also by some libraries, which depend on Expo, but have not yet been updated to support latest Expo features.
 
 - Frequency bin labels are wrong 🤷. Eventually I needed to display them in log scale and I am too lazy to think about how to recalculate everything properly.
-- Modifying the `sound.setOnAudioSampleReceived` callback and the Reanimated stuff requires at least picking the song again to reload properly, sometimes whole app restart is needed.
-- May not work on iOS emulator. _The JSI Audio should work, but as far as I remember, the music picker does not open. And, of course, Bluetooth cannot work on simulator._
+- Modifying the audio callback code and hot reloading while a song is playing sometimes crashes the app with
+  ```
+  Error: FunctionCallException: Calling the 'setAudioSamplingEnabled' function has failed (at ExpoModulesCore/SyncFunctionDefinition.swift:137)
+    → Caused by: NativeSharedObjectNotFoundException: Unable to find the native shared object associated with given JavaScript object (at ExpoModulesCore/DynamicSharedObjectType.swift:58)]
+  ```
+- May not work on iOS emulator. _The JSI Audio should work, but the music picker does not open. And, of course, Bluetooth cannot work on simulator._
 - ~~Not yet works for Android~~ There's basic experimental Android support, but with issues:
   - GL View sometimes crashes
   - JSI Audio might crash after a few seconds

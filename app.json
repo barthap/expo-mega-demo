@@ -6,7 +6,10 @@
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "scheme": "demo",
-    "platforms": ["android", "ios"],
+    "platforms": [
+      "android",
+      "ios"
+    ],
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
@@ -26,11 +29,14 @@
         "backgroundColor": "#FFFFFF"
       }
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "plugins": [
       "react-native-ble-plx",
       "./patches/fix-entitlements.plugin",
-      "./custom_native_modules/expo-music-picker/app.plugin"
+      "./custom_native_modules/expo-music-picker/app.plugin",
+      "expo-audio"
     ]
   }
 }

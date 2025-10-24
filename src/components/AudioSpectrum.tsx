@@ -1,9 +1,8 @@
-import { StatusBar } from "expo-status-bar";
 import React from "react";
-import { Button, Dimensions, StyleSheet } from "react-native";
+import { Dimensions, StyleSheet } from "react-native";
 import { Layout, Text } from "@ui-kitten/components";
 import Reanimated, {
-  Extrapolate,
+  Extrapolation,
   interpolate,
   SharedValue,
   useAnimatedStyle,
@@ -43,23 +42,23 @@ export default function AudioSpectrum({ bins, frequencyRange, height }: Props) {
   for (let i = 0; i < bins.length; i++) {
     // eslint-disable-next-line react-hooks/rules-of-hooks
     // as long as the hooks are always called in the same order, it's ok
+
     animatedStyles[i] = useAnimatedStyle(() => {
-      const rawBin = bins[i].value;
+      const binValue = bins[i].value;
       const value = interpolate(
-        rawBin,
+        binValue,
         [1, 100],
         [1, height],
-        Extrapolate.CLAMP,
+        Extrapolation.CLAMP,
       );
       return {
-        // TODO: Not sure why these don't work anymore
         height: withSpring(value, {
-          // mass: 1,
-          // damping: 500,
-          // stiffness: 1000,
+          mass: 1,
+          damping: 500,
+          stiffness: 800,
         }),
       };
-    }, [bins[i]]);
+    });
   }
 
   return (

@@ -2,7 +2,6 @@ import * as React from "react";
 
 import Ionicons from "@expo/vector-icons/Ionicons";
 import Slider from "@react-native-community/slider";
-import { AVMetadata } from "expo-av";
 import {
   GestureResponderEvent,
   StyleProp,
@@ -11,16 +10,11 @@ import {
   ViewStyle,
 } from "react-native";
 import {
-  Layout,
   Text,
-  Button,
-  Icon,
-  useTheme,
   withStyles,
   EvaProp,
 } from "@ui-kitten/components";
-
-//import Colors from './Colors';
+import { AudioStatus } from "expo-audio";
 
 interface Props {
   header?: JSX.Element;
@@ -47,14 +41,9 @@ interface Props {
   setVolume: (volume: number) => void;
 
   // Status
-  isLoaded: boolean;
-  isLooping: boolean;
+  playerStatus: AudioStatus;
+  title: string | null;
   volume: number;
-  positionMillis: number;
-  durationMillis: number;
-  isPlaying: boolean;
-  isMuted: boolean;
-  metadata?: AVMetadata;
 
   // Error
   eva?: EvaProp;
@@ -69,29 +58,34 @@ function Player(props: Props) {
   const [initialScrubbingMillis, setInitialScrubbingMillis] = React.useState<
     undefined | number
   >();
+  
+  const { loop, currentTime, isLoaded, playing, duration, mute } = props.playerStatus;
+  
+  const positionMillis = currentTime * 1000;
+  const durationMillis = duration * 1000;
 
   const _play = () => props.playAsync();
 
   const _pause = () => props.pauseAsync();
 
   const _playFromPosition = (position: number) =>
-    props.setPositionAsync(position).then(() => setIsScrubbing(false));
+    props.setPositionAsync(position / 1000.0).then(() => setIsScrubbing(false));
 
-  const _toggleLooping = () => props.setIsLoopingAsync(!props.isLooping);
+  const _toggleLooping = () => props.setIsLoopingAsync(!loop);
 
   const _seekForward = () =>
-    props.setPositionAsync(props.positionMillis + 5000);
+    props.setPositionAsync(currentTime + 5.0);
 
   const _seekBackward = () =>
-    props.setPositionAsync(Math.max(0, props.positionMillis - 5000));
+    props.setPositionAsync(Math.max(0, currentTime - 5.0));
 
   const _renderReplayButton = () => {
     return (
-      <TouchableOpacity onPress={_toggleLooping} disabled={!props.isLoaded}>
+      <TouchableOpacity onPress={_toggleLooping} disabled={!isLoaded}>
         <Ionicons
           name="repeat"
           size={34}
-          style={[styles.icon, !props.isLooping && { color: "#C1C1C1" }]}
+          style={[styles.icon, !loop && { color: "#C1C1C1" }]}
         />
       </TouchableOpacity>
     );
@@ -99,30 +93,21 @@ function Player(props: Props) {
 
   const _renderPlayPauseButton = () => {
     let onPress = _pause;
-    // let iconName = 'pause-circle-outline';
     let iconName = "pause";
 
-    if (!props.isPlaying) {
+    if (!playing) {
       onPress = _play;
-      // iconName = 'play-circle-outline';
       iconName = "play";
     }
 
     return (
-      // <Button
-      //   onPress={onPress}
-      //   disabled={!props.isLoaded}
-      //   style={[styles.icon, styles.playPauseIcon]}
-      //   appearance="ghost"
-      //   accessoryLeft={(props) => <Icon {...props} name={iconName}/>}
-      //   />
-      <TouchableOpacity onPress={onPress} disabled={!props.isLoaded}>
+      <TouchableOpacity onPress={onPress} disabled={!isLoaded}>
         <Ionicons
-          name={iconName as "pause" | "ios-play"}
+          name={iconName as "pause" | "play"}
           style={[
             styles.icon,
             styles.playPauseIcon,
-            !props.isLoaded && styles.disabledIcon,
+            !isLoaded && styles.disabledIcon,
           ]}
         />
       </TouchableOpacity>
@@ -142,7 +127,7 @@ function Player(props: Props) {
     onPress: (event: GestureResponderEvent) => void;
     forceEnabled?: boolean;
   }) => {
-    const isDisabled = !props.isLoaded && !forceEnabled;
+    const isDisabled = !isLoaded && !forceEnabled;
     if (disable) {
       return null;
     }
@@ -179,16 +164,16 @@ function Player(props: Props) {
       <View style={styles.container}>
         {_renderPlayPauseButton()}
         <Slider
-          style={[styles.slider, !props.isLoaded && styles.disabledIcon]}
+          style={[styles.slider, !isLoaded && styles.disabledIcon]}
           thumbTintColor={tintColor}
-          value={isScrubbing ? initialScrubbingMillis : props.positionMillis}
-          maximumValue={props.durationMillis}
-          disabled={!props.isLoaded}
+          value={isScrubbing ? initialScrubbingMillis : positionMillis}
+          maximumValue={durationMillis}
+          disabled={!isLoaded}
           minimumTrackTintColor={tintColor}
           onSlidingComplete={_playFromPosition}
           onResponderGrant={() => {
             setIsScrubbing(true);
-            setInitialScrubbingMillis(props.positionMillis);
+            setInitialScrubbingMillis(positionMillis);
           }}
         />
         <Text
@@ -196,8 +181,8 @@ function Player(props: Props) {
           adjustsFontSizeToFit
           numberOfLines={1}
         >
-          {_formatTime(props.positionMillis / 1000)} /{" "}
-          {_formatTime(props.durationMillis / 1000)}
+          {_formatTime(currentTime)} /{" "}
+          {_formatTime(duration)}
         </Text>
         {_renderReplayButton()}
       </View>
@@ -206,16 +191,16 @@ function Player(props: Props) {
         category="c2"
         numberOfLines={1}
         style={{ paddingHorizontal: 8 }}
-        appearance={props.metadata?.title ? "default" : "hint"}
+        appearance={props.title ? "default" : "hint"}
       >
-        {props.metadata?.title || "No song selected"}
+        {props.title || "No song selected"}
       </Text>
 
       <View style={styles.container}>
         <VolumeSlider
           color={tintColor}
-          isMuted={props.isMuted}
-          disabled={!props.isLoaded}
+          isMuted={mute}
+          disabled={!isLoaded}
           style={{ width: undefined, flex: 1 }}
           volume={props.volume}
           onValueChanged={({ isMuted, volume }) => {
@@ -224,13 +209,6 @@ function Player(props: Props) {
           }}
         />
       </View>
-
-      {/* <View style={[styles.container, styles.buttonsContainer]}>
-        {(props.extraButtons ?? []).map((button) => {
-          if (typeof button === "function") return button();
-          return _renderAuxiliaryButton(button);
-        })}
-      </View> */}
 
       <View style={[styles.container, styles.buttonsContainer]}>
         {_renderAuxiliaryButton({
