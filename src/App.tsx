@@ -9,7 +9,7 @@ import {
 } from "@ui-kitten/components";
 import { EvaIconsPack } from "@ui-kitten/eva-icons";
 import { StatusBar } from "expo-status-bar";
-import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
+import { NativeSafeAreaViewProps, SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { default as theme } from "../assets/custom-theme.json";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 
@@ -23,7 +23,7 @@ LogBox.ignoreLogs([
   /No native splash screen registered for given view controller/,
 ]);
 
-function ThemedSafeArea(props) {
+function ThemedSafeArea(props: NativeSafeAreaViewProps) {
   const theme = useTheme();
   return (
     <SafeAreaView
@@ -41,7 +41,7 @@ export default function App() {
     <GestureHandlerRootView>
       <SafeAreaProvider>
         <IconRegistry icons={EvaIconsPack} />
-        <StatusBar style="dark" />
+        <StatusBar style="light" />
         <ApplicationProvider {...eva} theme={{ ...eva.dark, ...theme }}>
           <ThemedSafeArea style={{ flex: 1 }}>
             <Navigation />
