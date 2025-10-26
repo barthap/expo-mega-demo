@@ -27,9 +27,45 @@ interface Props {
   height: number;
 }
 
-export default function AudioSpectrum({ bins, frequencyRange, height }: Props) {
-  height -= AXIS_LABELS_HEIGHT;
-  const binWidth = Dimensions.get("window").width / bins.length;
+interface SpectrumBinProps {
+  binValue: SharedValue<number>,
+  binWidth: number;
+  maxHeight: number,
+}
+function SpectrumBin(props: SpectrumBinProps) {
+  const { binValue, binWidth, maxHeight} = props;
+  const animatedStyle = useAnimatedStyle(() => {
+    const value = interpolate(
+      binValue.value,
+      [1, 100],
+      [1, maxHeight],
+      Extrapolation.CLAMP,
+    );
+    return {
+      height: withSpring(value, {
+        mass: 1,
+        damping: 500,
+        stiffness: 800,
+      }),
+    };
+  });
+  return (
+    <Reanimated.View
+      style={[styles.bin, animatedStyle, { width: binWidth }]}
+    />
+  );
+}
+
+export default function AudioSpectrum(props: Props) {
+  const { bins, frequencyRange } = props;
+
+  const height = props.height - AXIS_LABELS_HEIGHT;
+  const binWidth = React.useMemo(
+    // Although caching is not recommended, we don't support
+    // landscape mode, so this stays constant
+    () => Dimensions.get("window").width / bins.length,
+    [bins.length]
+  );
 
   const [lowFreq, highFreq] = frequencyRange;
   const midFreq = React.useMemo(
@@ -37,40 +73,22 @@ export default function AudioSpectrum({ bins, frequencyRange, height }: Props) {
     [lowFreq, highFreq],
   );
 
-  const animatedStyles: any[] = new Array(bins.length);
-
-  for (let i = 0; i < bins.length; i++) {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    // as long as the hooks are always called in the same order, it's ok
-
-    animatedStyles[i] = useAnimatedStyle(() => {
-      const binValue = bins[i].value;
-      const value = interpolate(
-        binValue,
-        [1, 100],
-        [1, height],
-        Extrapolation.CLAMP,
-      );
-      return {
-        height: withSpring(value, {
-          mass: 1,
-          damping: 500,
-          stiffness: 800,
-        }),
-      };
-    });
-  }
+  const binElements = React.useMemo(() => [...new Array(bins.length).keys()].map((key, idx) => (
+    <SpectrumBin
+      key={key}
+      binValue={bins[idx]}
+      binWidth={binWidth}
+      maxHeight={height}
+    />
+    // we don't have to memoize bins, they're SharedValues and
+    // their references don't change (as long as created with useSharedValue())
+  )), [bins.length, binWidth, height]);
 
   return (
     <>
       <Layout level="1" style={[styles.binContainer, { height }]}>
         <Reanimated.View style={{ width: 0, height }} />
-        {animatedStyles.map((style, idx) => (
-          <Reanimated.View
-            key={idx}
-            style={[styles.bin, style, { width: binWidth }]}
-          />
-        ))}
+        {binElements}
       </Layout>
       <Layout level="3" style={styles.xAxisLabels}>
         <Text>{formatHertzString(lowFreq, { digits: 0 })} Hz</Text>
