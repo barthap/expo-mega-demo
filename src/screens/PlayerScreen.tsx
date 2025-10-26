@@ -57,6 +57,10 @@ type Song = {
   uri: string
 };
 
+function hannWindow(n: number, N: number): number {
+  return 0.5 * (1 - Math.cos((2 * Math.PI * n / N)));
+}
+
 export default function PlayerScreen() {
   const [song, setSong] = React.useState<Song | null>(null);
 
@@ -162,11 +166,12 @@ export default function PlayerScreen() {
     // but let's take 512 of these bins (bandwidth = 11 kHz)
     // then single original bin width = 21Hz (still)
     // we just ignore the higher part
-    const samples = sample.channels[0].frames.slice(0, FFT_SIZE);
-    const freqs = cfft(samples).map((n) => n.mag());
+    const frames = sample.channels[0].frames;
+    const samples = frames.slice(0, FFT_SIZE).map((v, i) => v * hannWindow(i, FFT_SIZE));
+    const freqs = cfft(samples);
 
     if (freqs.some(isNaN)) return;
-    const binValues = calculateBins(freqs);
+    const binValues = calculateBins(freqs.map(f => f.mag()));
     scheduleOnUI(updateBinHeights, binValues);
   };
   useAudioSampleListener(player, onSampleReceived);
