@@ -15,6 +15,7 @@ import {
 import { scheduleOnUI } from "react-native-worklets";
 import { cfft } from "../math/fft";
 import {
+  binCalculatorFactory,
   convWidthForNumBins,
   getBinWidth,
   ithBinToFreq,
@@ -34,14 +35,14 @@ function prepareSongDisplayName({ artist, title }: MusicPicker.MusicItem) {
 
 const FFT_SIZE = 2048;
 const SAMPLING_RATE = 44100;
-const N_SAMPLES_TO_PROCESS = 256;
-const NUM_BINS = 10;
+const N_SAMPLES_TO_PROCESS = 512;
+const NUM_BINS = 16;
 const LOG_COEFF = 20;
 const BIN_WIDTH = getBinWidth(SAMPLING_RATE, FFT_SIZE);
 
 // I realized that it will no longer work for log scale
-const DISPLAY_BIN_WIDTH =
-  convWidthForNumBins(NUM_BINS, N_SAMPLES_TO_PROCESS) * BIN_WIDTH;
+// const DISPLAY_BIN_WIDTH =
+//   convWidthForNumBins(NUM_BINS, N_SAMPLES_TO_PROCESS) * BIN_WIDTH;
 const invLog = makeInvLogFn(LOG_COEFF, N_SAMPLES_TO_PROCESS);
 const FIRST_BIN_FREQ = ithBinToFreq(BIN_WIDTH)(invLog(20));
 const MAX_BIN_FREQ = BIN_WIDTH * N_SAMPLES_TO_PROCESS;
@@ -51,6 +52,7 @@ const calculateBins = makeOptimalQuadraticBinsForSamples(
   N_SAMPLES_TO_PROCESS,
   LOG_COEFF,
 );
+const getBinValues = binCalculatorFactory(NUM_BINS, N_SAMPLES_TO_PROCESS);
 
 type Song = {
   title: string;
@@ -61,8 +63,12 @@ function hannWindow(n: number, N: number): number {
   return 0.5 * (1 - Math.cos((2 * Math.PI * n / N)));
 }
 
+const initialSong = Object.freeze({
+  uri: "https://www.audiocheck.net/Audio/audiocheck.net_sweep20-20klog.ogg",
+  title: "Sweep"
+});
 export default function PlayerScreen() {
-  const [song, setSong] = React.useState<Song | null>(null);
+  const [song, setSong] = React.useState<Song | null>(initialSong);
 
   const player = useAudioPlayer(song?.uri);
   const playerStatus = useAudioPlayerStatus(player);
@@ -127,7 +133,7 @@ export default function PlayerScreen() {
     console.log("Song:", selectedSong);
     console.log("Loading Sound");
     console.log("Bin width", BIN_WIDTH);
-    console.log("Display bin width", DISPLAY_BIN_WIDTH);
+    // console.log("Display bin width", DISPLAY_BIN_WIDTH);
     console.log("Max bin freq", MAX_BIN_FREQ);
     unloadSound(); // unload previous song, if exists
     setSong({ uri: selectedSong.uri, title: prepareSongDisplayName(selectedSong) });
@@ -138,8 +144,8 @@ export default function PlayerScreen() {
     for (let i = 0; i < NUM_BINS; i++) {
       bins[i].value = interpolate(
         values[i],
-        [0, 80, 120, 200],
-        [1, 60, 90, 100],
+        [0, 40, 55],
+        [1, 90, 100],
         Extrapolation.CLAMP,
       );
     }
@@ -170,8 +176,10 @@ export default function PlayerScreen() {
     const samples = frames.slice(0, FFT_SIZE).map((v, i) => v * hannWindow(i, FFT_SIZE));
     const freqs = cfft(samples);
 
-    if (freqs.some(isNaN)) return;
-    const binValues = calculateBins(freqs.map(f => f.mag()));
+    // const magnitudes = freqs.map((n) => n.mag());
+    // if (magnitudes.some(isNaN)) return;
+    // const binValues = calculateBins(magnitudes);
+    const binValues = getBinValues(freqs);
     scheduleOnUI(updateBinHeights, binValues);
   };
   useAudioSampleListener(player, onSampleReceived);

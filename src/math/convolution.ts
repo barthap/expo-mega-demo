@@ -1,3 +1,4 @@
+import { Complex } from "./fft";
 import { generateLogIndexArray } from "./invLog";
 
 /**
@@ -96,6 +97,98 @@ export function normalizeUsingSum(bins: number[]): number[] {
   return bins.map((bin) => bin / sum);
 }
 
+const aWeightFrequency = [ 
+  10, 12.5, 16, 20, 
+  25, 31.5, 40, 50, 
+  63, 80, 100, 125, 
+  160, 200, 250, 315, 
+  400, 500, 630, 800, 
+  1000, 1250, 1600, 2000, 
+  2500, 3150, 4000, 5000,
+  6300, 8000, 10000, 12500, 
+  16000, 20000 
+];
+
+const aWeightDecibels = [
+  -70.4, -63.4, -56.7, -50.5, 
+  -44.7, -39.4, -34.6, -30.2, 
+  -26.2, -22.5, -19.1, -16.1, 
+  -13.4, -10.9, -8.6, -6.6, 
+  -4.8, -3.2, -1.9, -0.8, 
+  0.0, 0.6, 1.0, 1.2, 
+  1.3, 1.2, 1.0, 0.5, 
+  -0.1, -1.1, -2.5, -4.3, 
+  -6.6, -9.3 
+];
+function calculateAWeightingDBForFFTAverages(fftSize: number) {
+  const result = new Array(fftSize / 2).fill(0);
+
+  const fftBandWidth = 44100 / 2048;
+  for (let i = 0; i < result.length; i++) {
+    const binCenterFreq = (i + 1) * fftBandWidth / 2;
+    result[i] = calculateAWeightingDBAtFrequency(binCenterFreq);
+  }
+  return result;    
+}
+
+function calculateAWeightingDBAtFrequency(frequency: number) {
+  return linterp(aWeightFrequency, aWeightDecibels, frequency);    
+}
+function linterp(x: number[], y: number[], xx: number) {
+  // assert(x.length > 1);
+  // assert(x.length == y.length);
+
+  let result = 0.0;
+  let found = false;
+
+  if (x[0] > xx) {
+    result = y[0];
+    found = true;
+  }
+
+  if (!found) {
+    for (let i = 1; i < x.length; i++) {
+      if (x[i] > xx) {
+        result = y[i-1] + ((xx - x[i-1]) / (x[i] - x[i-1])) * (y[i] - y[i-1]);
+        found = true;
+        break;
+      }
+    }
+  }
+
+  if (!found) {
+    result = y[y.length-1];
+  }
+
+  return result;     
+}
+
+export function binCalculatorFactory(numBins: number, fftSliceSize: number) {
+  const d = Math.log10(fftSliceSize-1)/numBins;
+  
+  const aWeightDBAtBandCentreFreqs = calculateAWeightingDBForFFTAverages(2048);
+  
+  return (fftSamples: Complex[]) => {
+    const results = new Array<number>(numBins).fill(0);
+
+    let startIdx = 1;
+    for (let binIdx = 0; binIdx < numBins; binIdx++) {
+      const endIdx = Math.round(Math.pow(10,(binIdx+1)*d))
+      
+      for (let j = startIdx; j <= endIdx; j++) {
+        let [re, im] = fftSamples[j].components();
+        const power = re * re + im * im
+        const bandsPerBin = endIdx - startIdx + 1;
+        const powerDb = 10 * Math.log10(power) + aWeightDBAtBandCentreFreqs[j + bandsPerBin] * 0.4;
+        results[binIdx] = Math.max(results[binIdx], powerDb);
+      }
+      
+      startIdx = endIdx+1;
+    }
+    return results;
+  };
+}
+
 /**
  * A higher-order function. Returns a function which converts fft samples
  * into `numBins` frequency bins, using logarythmic scale
@@ -114,6 +207,9 @@ export function makeOptimalQuadraticBinsForSamples(
 
   return (fftSamples: number[]) => {
     const results = new Array<number>(numBins).fill(0);
+    const [,maxIndex] = fftSamples.slice(0, 1024).reduce(([prev_val, prev_i], val, i) => val > prev_val ? [val, i] : [prev_val, prev_i], [0, 0]);
+    console.log(maxIndex, indexRemap[maxIndex]);
+
     for (let binIdx = 0; binIdx < numBins; binIdx++) {
       // step = convWidth
       const x0 = (binIdx + 1) * convWidth;

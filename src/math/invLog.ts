@@ -31,8 +31,8 @@ export const makeInvLogFn = (a: number, lastSample: number) => {
  * @param size how many indices to generate, log fn has property `f(size) = size`
  */
 export function generateLogIndexArray(a: number, size: number): number[] {
-  const invLog = makeLogFn(a, size);
+  const logFn = makeLogFn(a, size);
   return new Array(size).fill(undefined).map((_, i) => {
-    return Math.round(invLog(i));
+    return Math.round(logFn(i));
   });
 }
