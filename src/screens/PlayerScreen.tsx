@@ -62,13 +62,13 @@ export default function PlayerScreen() {
 
   const player = useAudioPlayer(song?.uri);
   const playerStatus = useAudioPlayerStatus(player);
-  
+
   React.useEffect(() => {
     void setAudioModeAsync({
       playsInSilentMode: true
     });
   }, []);
-  
+
   React.useEffect(() => {
     console.log('State:', playerStatus.playbackState);
     console.log('Status:', playerStatus.timeControlStatus);
@@ -86,7 +86,7 @@ export default function PlayerScreen() {
       } catch {
         console.log("WARN: Audio shared object already removed")
       }
-      
+
       setSong(null);
       scheduleOnUI(fadeBinsDown);
     }
@@ -114,7 +114,7 @@ export default function PlayerScreen() {
       return;
     }
     const [selectedSong] = result.items;
-    
+
     if (selectedSong.uri == song?.uri) {
       // the same song selected, do nothing
       return;

@@ -64,20 +64,16 @@ export default ({ h, s, onGestureEnd, backgroundColor }: PickerProps) => {
       scheduleOnRN(onGestureEnd);
     });
 
-  const pickerStyle = useAnimatedStyle(() => {
-    return {
-      transform: [
-        { translateX: x.value - PICKER_WIDTH / 2 },
-        { translateY: y.value - PICKER_HEIGHT / 2 },
-      ],
-    };
-  });
+  const pickerStyle = useAnimatedStyle(() => ({
+    transform: [
+      { translateX: x.value - PICKER_WIDTH / 2 },
+      { translateY: y.value - PICKER_HEIGHT / 2 },
+    ],
+  }));
 
-  const animatedProps = useAnimatedProps(() => {
-    return {
+  const animatedProps = useAnimatedProps(() => ({
       fill: backgroundColor.value,
-    };
-  });
+  }));
 
   return (
     <View style={StyleSheet.absoluteFill}>
@@ -101,9 +97,8 @@ export default ({ h, s, onGestureEnd, backgroundColor }: PickerProps) => {
             width={PICKER_WIDTH + STROKE_WIDTH * 2}
             height={PICKER_HEIGHT}
             style={{ top: -PICKER_HEIGHT / 2 }}
-            viewBox={`-${STROKE_WIDTH / 2} -${STROKE_WIDTH / 2} ${
-              44 + STROKE_WIDTH
-            } ${60 + STROKE_WIDTH}`}
+            viewBox={`-${STROKE_WIDTH / 2} -${STROKE_WIDTH / 2} ${44 + STROKE_WIDTH
+              } ${60 + STROKE_WIDTH}`}
           >
             <AnimatedPath
               d="M22 .889C9.943.889.167 10.664.167 22.723.167 37.127 22 59.111 22 59.111S43.833 37.43 43.833 22.723C43.833 10.664 34.057.889 22 .889z"

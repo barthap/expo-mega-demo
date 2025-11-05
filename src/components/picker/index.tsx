@@ -38,7 +38,12 @@ export default ({ onColorChange }: Props) => {
     return processColor(rgb2hex(r, g, b));
   }, [h, s, v]);
 
-  const colorChanged = () => {
+  const colorChanged = React.useCallback(() => {
+    if (!onColorChange) {
+      // don't unnecessarily recalculate
+      return;
+    }
+
     // convert range (-0.5, 0.5) to (0, 360)
     const hue = h.value * 360;
     const hsv = {
@@ -47,8 +52,8 @@ export default ({ onColorChange }: Props) => {
       v: v.value * 100,
     };
     const rgb = hsv2rgb(h.value, s.value, v.value);
-    onColorChange?.({ rgb, hsv });
-  };
+    onColorChange({ rgb, hsv });
+  }, [h.value, s.value, v.value, onColorChange]);
 
   return (
     <View style={styles.container}>
