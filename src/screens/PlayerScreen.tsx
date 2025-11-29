@@ -1,10 +1,10 @@
 import React from "react";
-import { StyleSheet, View } from "react-native";
+import { Platform, StyleSheet, View } from "react-native";
 import { Layout, Toggle } from "@ui-kitten/components";
 
 // TODO: Maybe configure this with tsconfig, babel and metro.config
 import * as MusicPicker from "../../custom_native_modules/expo-music-picker/src/ExpoMusicPicker";
-import { useAudioPlayer, useAudioPlayerStatus, useAudioSampleListener, AudioSample, setAudioModeAsync } from "expo-audio";
+import { useAudioPlayer, useAudioPlayerStatus, useAudioSampleListener, AudioSample, setAudioModeAsync, requestRecordingPermissionsAsync } from "expo-audio";
 import {
   cancelAnimation,
   Extrapolation,
@@ -201,7 +201,16 @@ export default function PlayerScreen() {
 
   async function startPlaying() {
     console.log("Playing Sound");
-    player.setAudioSamplingEnabled(true);
+
+    let recordPermissions = true;
+    if (Platform.OS === "android") {
+      const { granted } = await requestRecordingPermissionsAsync();
+      recordPermissions = granted;
+
+    }
+    if (recordPermissions) {
+      player.setAudioSamplingEnabled(true);
+    }
     player.play();
   }
 
@@ -221,12 +230,9 @@ export default function PlayerScreen() {
   const _replayAsync = async () => { await player.seekTo(0); player.play(); }
   const _setPositionAsync = async (position: number) =>
     player.seekTo(position)
-  const _setIsLoopingAsync = async (isLooping: boolean) =>
-    { player.loop = isLooping; }
-  const _setIsMutedAsync = async (isMuted: boolean) =>
-    { player.muted = isMuted; }
-  const _setVolumeAsync = async (volume: number) =>
-{ player.volume = volume; }
+  const _setIsLoopingAsync = async (isLooping: boolean) => { player.loop = isLooping; }
+  const _setIsMutedAsync = async (isMuted: boolean) => { player.muted = isMuted; }
+  const _setVolumeAsync = async (volume: number) => { player.volume = volume; }
 
   return (
     <Layout style={styles.container} level="2">
