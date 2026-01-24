@@ -20,14 +20,25 @@
     },
     "ios": {
       "bundleIdentifier": "com.barthap.expomegademo",
-      "supportsTablet": false
+      "supportsTablet": false,
+      "infoPlist": {
+        "NSAppleMusicUsageDescription": "Allow $(PRODUCT_NAME) to access your music library"
+      },
+      "appleTeamId": "T8HJHCKW2S"
     },
     "android": {
       "package": "com.barthap.expomegademo",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#FFFFFF"
-      }
+      },
+      "permissions": [
+        "android.permission.BLUETOOTH",
+        "android.permission.BLUETOOTH_ADMIN",
+        "android.permission.BLUETOOTH_CONNECT",
+        "android.permission.RECORD_AUDIO",
+        "android.permission.MODIFY_AUDIO_SETTINGS"
+      ]
     },
     "assetBundlePatterns": [
       "**/*"
@@ -41,7 +52,8 @@
         {
           "recordAudioAndroid": true
         }
-      ]
+      ],
+      "expo-asset"
     ]
   }
 }
